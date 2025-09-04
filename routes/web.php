@@ -9,4 +9,4 @@ Route::get('/', [UserController::class, 'home']);
 
 Route::get('/shop', [ProductController::class, 'index']);
 
-Route::post('/cart/add', [CartController::class, 'add']);
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');

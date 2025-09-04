@@ -2,32 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\AddToCartRequest;
+use App\Models\Cart;
+use App\Models\CartItem;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    public function add (Request $request) {
-        $productId = $request->product_id; 
-        $variantId = $request->variant_id; 
+    public function add(AddToCartRequest $request)
+    {
+        // Get session ID for guest user
+        $sessionId = session()->getId();
 
-        //simple cart stored in session 
-        $cart = session()->get('cart', []);
+        // Find or create cart
+        $cart = Cart::firstOrCreate(
+            ['session_id' => $sessionId],
+            ['user_id' => auth()->id()]
+        );
 
-        $key = $productId . '-' . $variantId; 
+        // Find existing item in cart
+        $item = CartItem::where('cart_id', $cart->id)
+            ->where('variant_id', $request->variant_id)
+            ->first();
 
-        if(isset($cart[$key])){
-            $cart[$key]['quantity'] += 1; 
+        if ($item) {
+            $item->quantity += $request->quantity ?? 1;
+            $item->save();
         } else {
-            $cart[$key] = [
-                'product_id' => $productId, 
-                'variant-id' => $variantId, 
-                'quantity' => 1, 
-            ];
+            CartItem::create([
+                'cart_id'    => $cart->id,
+                'product_id' => $request->product_id,
+                'variant_id' => $request->variant_id,
+                'quantity'   => $request->quantity ?? 1,
+                'price'      => \App\Models\ProductVariant::find($request->variant_id)->price
+            ]);
         }
 
-        session()->put('cart', $cart);
-
-        return response()->json(['cart' => $cart, 'message' => 'Added to cart!']);
-
+        return response()->json([
+            'success' => true,
+            'message' => 'Product added to cart!',
+            'cart'    => $cart->load('items')
+        ]);
     }
 }

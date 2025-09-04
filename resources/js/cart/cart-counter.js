@@ -1,0 +1,1 @@
+//Updates cart icon counter dynamically

@@ -8,7 +8,7 @@
 
             <!-- Loop Products -->
             @foreach($products as $product)
-                <div class="bg-white shadow-md rounded-2xl overflow-hidden w-72" data-product-id="{{ $product->id }}">
+                <div class="product-card bg-white shadow-md rounded-2xl overflow-hidden w-72" data-product-id="{{ $product->id }}">
                     <!-- Product Image -->
                     <div id="product-img-{{ $product->id }}">
                         <img src="{{ $product->variants->first()->image_url }}" 
@@ -45,14 +45,13 @@
 
                         <!-- Price + Cart -->
                         <div class="flex justify-between items-center mt-3">
-                            <p id="price-{{ $product->id }}" class="font-semibold text-lg">
+                            <p id="price-{{ $product->id }}" class="price font-semibold text-lg">
                                 ${{ number_format($product->variants->first()->price, 2) }}
                             </p>
                             <button 
                                 type="button" 
                                 class="add-to-cart"
                                 data-product-id="{{$product->id}}"
-                                data-variant-id="{{$variant->id}}"
                                 >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" width="39" height="44" viewBox="0 0 39 44"><path id="Subtraction_3" data-name="Subtraction 3" d="M35.487,43H2.513A2.372,2.372,0,0,1,0,40.807L3.768,16.678a2.373,2.373,0,0,1,2.513-2.194H9.735v-4.9a9.579,9.579,0,1,1,19.157,0v4.9h2.826a2.372,2.372,0,0,1,2.513,2.194L38,40.807A2.372,2.372,0,0,1,35.487,43ZM19.314,2.575A6.131,6.131,0,0,0,13.19,8.7v5.785H25.438V8.7A6.131,6.131,0,0,0,19.314,2.575Z" fill="#f7c758"/><text id="_" data-name="+" transform="translate(8 3)" fill="#1f3a25" font-size="35" font-family="'\.AppleSystemUIFont'"><tspan x="0" y="34">+</tspan></text></svg>
                             </button>

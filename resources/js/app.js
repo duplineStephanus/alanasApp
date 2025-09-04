@@ -1,2 +1,6 @@
+//main entry point for vite 
 import './bootstrap';
-import './product-variants';
+import './cart/add-to-cart';
+import './cart/cart-counter';
+import './products/product-variant';
+import './products/product-filter';
