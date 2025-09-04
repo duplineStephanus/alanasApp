@@ -1,0 +1,5 @@
+@layer components {
+    .links {
+        @apply font-body font-thin py-1 hover:font-normal; 
+    }
+}
