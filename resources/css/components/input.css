@@ -1,0 +1,6 @@
+@layer components {
+    input {
+        @apply mt-1 block w-full border border-gray-300 rounded-lg p-2;
+
+    }
+}

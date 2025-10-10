@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AddToCartRequest;
 use App\Models\Cart;
 use App\Models\CartItem;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\AddToCartRequest;
 
 class CartController extends Controller
 {
@@ -40,8 +39,29 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Product added to cart!',
+            'message' => 'Woohoo! Product added to cart!',
             'cart'    => $cart->load('items')
         ]);
     }
+
+    public function count()
+    {
+        // Get session ID for guest user
+        $sessionId = session()->getId();
+
+        // Find cart for current user/session
+        $cart = Cart::where('session_id', $sessionId)
+            ->orWhere('user_id', auth()->id())
+            ->first();
+
+        $count = 0;
+        if ($cart) {
+            $count = $cart->items()->sum('quantity');
+        }
+
+        return response()->json([
+            'count' => $count
+        ]);
+    }
+    
 }

@@ -8,7 +8,7 @@
 
             <!-- Loop Products -->
             @foreach($products as $product)
-                <div class="product-card bg-white shadow-md rounded-2xl overflow-hidden w-72" data-product-id="{{ $product->id }}">
+                <div class="product-card bg-white shadow-md rounded-2xl overflow-hidden w-100" data-product-id="{{ $product->id }}">
                     <!-- Product Image -->
                     <div id="product-img-{{ $product->id }}">
                         <img src="{{ $product->variants->first()->image_url }}" 

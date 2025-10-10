@@ -1,1 +1,18 @@
-//Updates cart icon counter dynamically
+import axios from "axios";
+
+export async function updateCartCounter() {
+    const cartCounter = document.querySelector(".cart-counter");
+
+    if (!cartCounter) return;
+
+    try {
+        const response = await axios.get("/cart/count");
+        const count = response.data.count;
+
+        cartCounter.textContent = count;
+        console.log("Cart count updated to:", count);// For testing
+
+    } catch (error) {
+        console.error("Error fetching cart count:", error);
+    }
+}

@@ -10,3 +10,9 @@ Route::get('/', [UserController::class, 'home']);
 Route::get('/shop', [ProductController::class, 'index']);
 
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+
+Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+
+Route::post('/signin-email', [UserController::class, 'signinEmail'])->name('signin-email');
+
+

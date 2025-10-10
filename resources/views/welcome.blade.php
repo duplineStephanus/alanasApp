@@ -1,3 +1,3 @@
 <x-layout>
-    This is the welcome page! 
+    hellow world 
 </x-layout>
