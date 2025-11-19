@@ -8,12 +8,12 @@
     <title>Alana's App</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-sandyshore/20 text-coconuthusk">
+<body class="bg-white text-coconuthusk">
     <div >
         <x-mobile-menu/>
         <x-signin-modal/>
         <!-- Header -->
-        <header class="relative bg-sandyshore/20">
+        <header class="relative">
             <nav aria-label="Top" class="mx-auto max-w-full px-4 sm:px-6 lg:px-8 my-1 py-1 mt-2">
                 <div class="flex h-16 items-center">
                     <div class="flex space-x-3">
@@ -38,9 +38,9 @@
                     <form class="hidden md:block w-xl mx-auto">   
                         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                         <div class="relative">
-                            <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search products, contents..." required />
+                            <input type="search" id="default-search" class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded-full bg-gray-50 focus:outline-none focus:ring-0 focus:ring-coastalfern focus:border-coastalfern dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coastalfern dark:focus:border-coastalfern" placeholder="Search products, contents..." required />
                             <button type="submit" class="absolute end-2.5 bottom-2.5 text-3xl text-gray-500 hover:text-tamanuleaf">
-                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <i class="fa-solid fa-magnifying-glass text-base"></i>
                                 <span class="sr-only">Search</span>
                             </button>
                         </div>
