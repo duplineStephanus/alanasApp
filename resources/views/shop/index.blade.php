@@ -28,6 +28,8 @@
                             {{ $product->description }}
                         </p>
 
+                        <a href="{{ route('products.show', $product) }}" class="text-coastalfern hover:underline font-body">View Details</a>
+
                         <!-- Variant Selector -->
                         <div class="mt-3">
                             <select name="size" 

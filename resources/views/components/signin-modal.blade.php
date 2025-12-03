@@ -48,7 +48,6 @@
 
                 </div>
                 
-                
                 {{-- *** if user exist --}}
                 <!-- Sign in : enter email and continue-->
 
@@ -79,19 +78,13 @@
                         <p id="signin-passwordError" class="text-red-500 text-sm mt-1 hidden">Invalid password.</p>
                     </div>
 
-
                     <button type="button" id="signin-step2-signin-btn" class="btn-primary">Sign In</button>
 
                     <div class="mb-4 text-xs text-gray-500">
                         <p>By signing in you agree to Our Terms of Use and Privacy Policy.</p>
                     </div>
                     
-                    
                 </div>
-
-
-
-
 
                 {{-- *** eles --}}
                     <!-- register user -->
@@ -218,7 +211,12 @@
                         <div class="mb-4">
                             <label for="code" class="block text-sm font-medium text-tamanuleaf">Enter security code</label>
                             <input type="text" id="code" name="code" placeholder="Enter your code" required>
-                            <p id="codeError" class="text-red-500 text-sm mt-1 hidden">Invalid security code</p>
+                            <p id="codeError" class="text-red-500 text-sm mt-1 hidden">
+                                Invalid security code 
+                                <span>
+                                    Re-send code
+                                </span>
+                            </p>
                         </div>
 
                         <button type="button" id="verify-email-btn" class="btn-primary">Create Account</button>

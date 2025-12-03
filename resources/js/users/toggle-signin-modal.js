@@ -1,44 +1,33 @@
 import { signIn } from "./signin";
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Open modal
-    let signinBtns = document.querySelectorAll(".signin-btn");
+    const signinBtns = document.querySelectorAll(".signin-btn");
     const signinModal = document.getElementById("signinModal");
-    const signinStep1 = document.getElementById("signin-1");
 
+    // Open modal
     signinBtns.forEach(btn => {
         btn.addEventListener("click", () => {
-            if (signinModal && signinStep1) {
-                // ✅ Always reset modal first (so you don’t see previous step)
+            if (signinModal) {
                 resetSigninModal();
-
-                // Open the sign-in modal 
                 signinModal.classList.remove("hidden");
-                signinStep1.classList.remove("hidden");
-
-                // Start the sign-in logic (attach listeners, etc.)
-                signIn(); 
+                signIn(); // Attach step logic
             }
         });
     });
 
-    // Close modal (for any button with command="close-modal")
-    const closeButtons = document.querySelectorAll('[command="close-modal"]');
-    closeButtons.forEach(btn => {
+    // Close modal buttons
+    document.querySelectorAll('[command="close-modal"]').forEach(btn => {
         btn.addEventListener("click", () => {
-            const targetId = btn.getAttribute("commandfor");
-            const targetModal = document.getElementById(targetId);
+            const targetModal = document.getElementById(btn.getAttribute("commandfor"));
             if (targetModal) {
                 targetModal.classList.add("hidden");
-
-                // ✅ Reset modal state when closing
                 resetSigninModal();
             }
         });
     });
 
-    // ✅ Optional: Close when clicking the backdrop
-    signinModal.addEventListener("click", (e) => {
+    // Close when clicking outside modal
+    signinModal.addEventListener("click", e => {
         if (e.target.id === "signinModal") {
             signinModal.classList.add("hidden");
             resetSigninModal();
@@ -46,18 +35,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ✅ Add this function at the bottom
 function resetSigninModal() {
     const modal = document.getElementById("signinModal");
     if (!modal) return;
 
-    // Hide all step divs
+    // Hide all sections
     modal.querySelectorAll("form > div").forEach(div => div.classList.add("hidden"));
 
-    // Show the first step only
+    // Show first step
     const step1 = modal.querySelector("#signin-1");
     if (step1) step1.classList.remove("hidden");
 
-    // (Optional) clear inputs if you want a full reset
+    // Clear inputs
     modal.querySelectorAll("input").forEach(input => input.value = "");
 }

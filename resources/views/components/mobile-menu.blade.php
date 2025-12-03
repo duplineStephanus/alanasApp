@@ -16,7 +16,13 @@
 
                 <div class="space-y-6 border-t border-gray-200 px-4 py-6 font-body">
                     <div class="flow-root">
-                    <a href="#" class="-m-2 block p-2 font-medium text-gray-900">Shop</a>
+                        @auth
+                            <x-user-menu id="mobile-user-menu" variant="mobile"></x-user-menu>
+                        @endauth
+                    </div>
+                    <div class="flow-root">
+                    <a href="#" 
+                    class="-m-2 block p-2 font-medium text-gray-900">Shop</a>
                     </div>
                     <div class="flow-root">
                     <a href="#" class="-m-2 block p-2 font-medium text-gray-900">About Us</a>
@@ -30,12 +36,22 @@
                 </div>
 
                 <div class="space-y-6 border-t border-gray-200 px-4 py-6">
-                    <div class="flow-root">
-                    <button class="signin-btn -m-2 block p-2 font-medium text-gray-900" command="close" commandfor="mobile-menu">Sign in</button>
-                    </div>
-                    <div class="flow-root">
-                    <a href="#" class="-m-2 block p-2 font-medium text-gray-900">Register</a>
-                    </div>
+
+                    @auth
+                        <div class="flow-root">
+                        <button class="logout-btn -m-2 block p-2 font-medium text-gray-900" command="close" commandfor="mobile-menu">Logout</button>
+                        </div>
+                    @else
+                        <div class="flow-root">
+                        <button class="signin-btn -m-2 block p-2 font-medium text-gray-900" command="close" commandfor="mobile-menu">Sign in</button>
+                        </div>
+
+                        <div class="flow-root">
+                            <a href="#" class="-m-2 block p-2 font-medium text-gray-900">Register</a>
+                        </div>
+
+                    @endauth
+
                 </div>
             </el-dialog-panel>
         </div>

@@ -34,7 +34,7 @@
                         </button>
                     </div>
 
-                        <!-- Search form -->
+                    <!-- Search form -->
                     <form class="hidden md:block w-xl mx-auto">   
                         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                         <div class="relative">
@@ -48,10 +48,13 @@
 
                     <div class="ml-auto flex items-center">
                         <div class="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                        <button class="signin-btn text-sm font-medium text-gray-600 hover:text-gray-800">Sign in</button>
-                        <span aria-hidden="true" class="h-6 w-px bg-gray-200"></span>
-                        <a href="#" class="text-sm font-medium text-gray-600 hover:text-gray-800">Register</a>
-                        </div>
+                            
+                        <!-- Logout Form -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                            @csrf
+                        </form>
+
+                        <x-user-btn/> <!-- Greet user / show sign in button -->
 
                         <!-- Search icon at collapse -->
                         <div class="ml-4 flow-root md:hidden">
@@ -83,5 +86,6 @@
 
     <x-footer/>
 
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
 </body>
 </html>

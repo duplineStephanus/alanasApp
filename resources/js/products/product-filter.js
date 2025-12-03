@@ -1,1 +1,0 @@
-// Optional: filtering products by type or category

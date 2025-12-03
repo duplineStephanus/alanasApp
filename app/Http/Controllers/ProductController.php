@@ -14,4 +14,10 @@ class ProductController extends Controller
         return view('shop.index', compact('products'));
 
     }
+
+    public function show (Product $product)
+    {
+        $product->load('variants');
+        return view('shop.show', compact('product'));
+    }
 }
