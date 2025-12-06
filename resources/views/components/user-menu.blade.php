@@ -33,7 +33,6 @@
           </div>
         </div>
         <div class="group relative flex gap-x-6 rounded-lg p-2 hover:bg-white/5">
-          
           <div>
             <a href="#" class="font-semibold text-white">
               Orders
@@ -43,21 +42,16 @@
           </div>
         </div>
         <div class="group relative flex gap-x-6 rounded-lg p-2 hover:bg-white/5">
-          
           <div>
-
             <button
                 class="logout-btn width-full text-left text-white font-semibold">
                   Logout
                 <span class="absolute inset-0"></span>
-      
-                <p class="mt-1 text-gray-400">Log out of your account</p>
+                <p class="mt-1 text-gray-400">Log out of your account.</p>
             </button>
           </div>
         </div>
-        
       </div>
-      
     </div>
   </el-popover>
 </div>

@@ -50,6 +50,11 @@
                             <x-user-btn/> <!-- Greet user / show sign in button -->
                         </div>
 
+                        <!-- Log Out Form -->
+                        <form id="logout-form" action="{{route('logout')}}" method="POST" class="hidden">
+                            @csrf
+                        </form>
+
                         <!-- Search icon at collapse -->
                         <div class="ml-4 flow-root md:hidden">
                             <button type="button" class="group -m-2 flex items-center p-2">
