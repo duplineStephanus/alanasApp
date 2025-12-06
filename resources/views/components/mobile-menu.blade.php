@@ -21,7 +21,7 @@
                         @endauth
                     </div>
                     <div class="flow-root">
-                    <a href="#" 
+                    <a href="/" 
                     class="-m-2 block p-2 font-medium text-gray-900">Shop</a>
                     </div>
                     <div class="flow-root">

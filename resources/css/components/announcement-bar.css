@@ -1,0 +1,33 @@
+.announcement-bar {
+    position: relative;
+    overflow: hidden;
+    background-color: #1F3A25; /* tamanuleaf */
+    color: #EEE4CA;           /* sandyshore */
+    height: 40px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 1.125rem;
+    font-family: var(--font-body);
+    font-weight: 300;
+}
+
+.scroll-track {
+    display: inline-flex;
+    gap: 4rem; /* space between duplicates */
+    animation: scrollLoop 12s linear infinite;
+}
+
+.scroll-track span {
+    flex-shrink: 0; /* prevents squishing */
+}
+
+/* Animation: move left continuously */
+@keyframes scrollLoop {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-33.33%);
+    }
+}

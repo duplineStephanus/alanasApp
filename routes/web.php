@@ -7,8 +7,6 @@ use App\Http\Controllers\ProductController;
 
 Route::get('/', [UserController::class, 'home']);
 
-Route::get('/shop', [ProductController::class, 'index']);
-
 Route::get('/shop/{product}', [ProductController::class, 'show'])->name('products.show');
 
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');

@@ -30,11 +30,12 @@
                             <span class="sr-only">Open menu</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 50 35" class="text-tamanuleaf" fill="currentColor"><g id="Group_28" data-name="Group 28" transform="translate(-229 -79)"><rect id="Rectangle_8" data-name="Rectangle 8" width="50" height="7" rx="3.5" transform="translate(229 79)" /><rect id="Rectangle_9" data-name="Rectangle 9" width="50" height="7" rx="3.5" transform="translate(229 93)" /><rect id="Rectangle_10" data-name="Rectangle 10" width="50" height="7" rx="3.5" transform="translate(229 107)" /></g>
                             </svg>
+
                         </button>
                     </div>
 
                     <!-- Search form -->
-                    <form class="hidden md:block w-xl mx-auto">   
+                    <form class="block w-xl mx-auto">   
                         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                         <div class="relative">
                             <input type="search" id="default-search" class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded-full bg-gray-50 focus:outline-none focus:ring-0 focus:ring-coastalfern focus:border-coastalfern dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-coastalfern dark:focus:border-coastalfern" placeholder="Search products, contents..." required />
@@ -46,8 +47,16 @@
                     </form>
 
                     <div class="ml-auto flex items-center">
+                        <div class="flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                            
+                        <!-- Logout Form -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                            @csrf
+                        </form>
+
+                        <!-- Greet user / show sign in button -->
                         <div class="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                            <x-user-btn/> <!-- Greet user / show sign in button -->
+                            <x-user-btn/> 
                         </div>
 
                         <!-- Search icon at collapse -->
@@ -68,8 +77,6 @@
                                 <span class="sr-only">items in cart, view bag</span>
                             </a>
                         </div>
-
-
                     </div>
                 </div> 
             </nav>
@@ -96,3 +103,35 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

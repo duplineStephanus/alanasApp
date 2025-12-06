@@ -3,6 +3,8 @@
 @import './components/links.css';
 @import './components/btn.css';
 @import './components/input.css';
+@import './components/user-menu.css';
+@import './components/announcement-bar.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

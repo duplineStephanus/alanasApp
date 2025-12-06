@@ -11,10 +11,16 @@ use App\Models\Product;
 class UserController extends Controller
 {
     public function home () {
-        return view('welcome');
-        //if user or guest (view shop)
 
-        //if admin (view dashboard)
+         //if user/guest show all products using index function 
+         $products = Product::with('variants')->get();
+
+         if(!auth()->user() || !auth()->user()->is_admin) {
+             return view('shop.index', compact('products'));
+         }
+         
+         // if admin show dashboard page
+         //return view('admin.dashboard');
 
     }
 
@@ -62,7 +68,7 @@ class UserController extends Controller
         //normalize email
         $email = strtolower($request->email);
 
-// Save user temporarily unverified
+        // Save user temporarily unverified
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
