@@ -66,7 +66,7 @@
 
                     <div class="flex items-center space-x-2 mb-4">
                         <p id="signinStep2-email">jane.doe@gmail.com</p>
-                        <a href="" class="text-blue-500 text-sm">Change</a>
+                        <button type="button" class="change-email text-blue-500 text-sm">Change</button>
                     </div>
 
                     <div class="mb-4">
@@ -106,7 +106,7 @@
 
                         <div class="flex items-center space-x-5 mx-5 mb-4">
                             <p>jane.doe@gmail.com</p>
-                            <a href="" class="text-blue-500">Change</a>
+                            <button type="button" class="change-email text-blue-500 text-sm">Change</button>
                         </div>
 
                         <div class="mb-4">
@@ -125,8 +125,8 @@
                             <h1>Got an account?</h1>
                         </div>
 
-                        <div class="mb-4 text-lg text-blue-500">
-                            <a href="">Sign in using a different email.</a>
+                        <div class="mb-4 text-lg">
+                            <button type="button" class="change-email text-blue-500">Sign in using a different email.</button>
                         </div>
                     </div>   
                     
@@ -178,8 +178,8 @@
                             <h1>Got an account?</h1>
                         </div>
 
-                        <div class="mb-4 text-lg text-blue-500">
-                            <a href="">Sign in using a different email.</a>
+                        <div class="mb-4 text-lg">
+                            <button type="button" class="change-email text-blue-500">Sign in using a different email.</button>
                         </div>
 
                         <div class="mb-4 text-xs text-gray-500">

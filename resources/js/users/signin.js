@@ -19,6 +19,55 @@ export function signIn() {
         }
     }
 
+    function isValidEmail(email) {
+        // Returns true if email is valid format, false otherwise
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function isValidPassword(password) {
+        // Updated regex: Lookaheads for requirements, but allow any characters (fixes restrictive char class)
+        // Ensures min 8 chars, one lowercase, one uppercase, one digit, one specific special (@$!%*?&)
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
+    }
+
+    function clearErrors() {
+        // Hide all email and password error messages
+        modal.querySelectorAll(".text-red-500").forEach(el => el.classList.add("hidden"));
+        // Optionally, reset error text content if you change it dynamically
+        modal.querySelectorAll(".text-red-500").forEach(el => el.textContent = "");
+    }
+
+    // Prevent clicks within the form from propagating to backdrop
+    const form = document.getElementById("registerForm");
+    if (form) {
+        form.addEventListener('click', (e) => {
+            e.stopPropagation(); // Halts event bubbling to parent elements
+        });
+    }
+
+    // Clear errors when modal is opened
+    document.querySelectorAll('[command="show-modal"]').forEach(btn => {
+        btn.addEventListener("click", () => {
+            const modalId = btn.getAttribute("commandfor");
+            const modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                clearErrors();
+            }
+        });
+    });
+
+    // Clear errors when modal is closed
+    document.querySelectorAll('[command="close-modal"]').forEach(btn => {
+        btn.addEventListener("click", () => {
+            const modalId = btn.getAttribute("commandfor");
+            const modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                clearErrors();
+                modalEl.classList.add("hidden"); // actually hide the modal
+            }
+        });
+    });
+
     // Force the first section to initialize + autofocus
     showSection("signin-1");
 
@@ -28,7 +77,8 @@ export function signIn() {
         const email = document.getElementById("signin-email").value.trim();
         const errorEl = document.getElementById("signin-emailError");
 
-        if (!email || !email.includes("@")) {
+        if (!email || !isValidEmail(email)) {
+            errorEl.textContent = "Please enter a valid email.";
             errorEl.classList.remove("hidden");
             return;
         }
@@ -53,6 +103,7 @@ export function signIn() {
         const errorEl = document.getElementById("signin-passwordError");
 
         if (!password) {
+            errorEl.textContent = "Password is required";
             errorEl.classList.remove("hidden");
             return;
         }
@@ -81,16 +132,67 @@ export function signIn() {
         const password = document.getElementById("create-password").value.trim();
         const confirm = document.getElementById("create-password_confirmation").value.trim();
 
-        if (!name || !email || !password || password !== confirm) {
-            alert("Fill all fields correctly");
-            return;
+        let hasError = false;
+
+        // Name validation
+        const nameError = document.getElementById("create-nameError");
+        if (!name) {
+            nameError.textContent = "Name is required";
+            nameError.classList.remove("hidden");
+            hasError = true;
+        } else {
+            nameError.classList.add("hidden");
         }
 
+        // Email validation
+        const emailError = document.getElementById("create-emailError");
+        if (!isValidEmail(email)) {
+            emailError.textContent = "Please enter a valid email";
+            emailError.classList.remove("hidden");
+            hasError = true;
+        } else {
+            emailError.classList.add("hidden");
+        }
+
+        // Password validation
+        const passwordError = document.getElementById("create-passwordError");
+        if (!isValidPassword(password)) {
+            passwordError.textContent = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
+            passwordError.classList.remove("hidden");
+            hasError = true;
+        } else {
+            passwordError.classList.add("hidden");
+        }
+
+        // Confirm password validation
+        const confirmError = document.getElementById("create-passwordConfirmedError");
+        if (password !== confirm) {
+            confirmError.textContent = "Passwords do not match";
+            confirmError.classList.remove("hidden");
+            hasError = true;
+        } else {
+            confirmError.classList.add("hidden");
+        }
+
+        // Stop if any validation failed
+        if (hasError) return;
+
         try {
-            const res = await axios.post("/register", { name, email, password, password_confirmation: confirm });
-            if (res.data.status === "otp_sent") showSection("verifyEmailSection-otp");
-            else alert("Unexpected response");
-        } catch (err) { console.error(err); }
+            const res = await axios.post("/register", { 
+                name, 
+                email, 
+                password, 
+                password_confirmation: confirm 
+            });
+
+            if (res.data.status === "otp_sent")
+                showSection("verifyEmailSection-otp");
+            else 
+                alert("Unexpected response");
+
+        } catch (err) {
+            console.error(err);
+        }
     });
 
     // Step 5: Verify OTP
@@ -100,8 +202,45 @@ export function signIn() {
 
         try {
             const res = await axios.post("/verify-otp", { email, code });
-            if (res.data.verified) showSection("verifyEmailSection-confirmation");
-            else document.getElementById("codeError").classList.remove("hidden");
-        } catch (err) { console.error(err); }
+            if (res.data.verified) {
+                showSection("verifyEmailSection-confirmation");
+                // Optional: Auto-redirect after a brief delay to show confirmation
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+
+            } else {
+                document.getElementById("codeError").classList.remove("hidden");
+                //document.getElementById("codeError").textContent = res.data.message || 'Invalid security code';
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById("codeError").classList.remove("hidden");
+            document.getElementById("codeError").textContent = 'Something went wrong. Please try again.';
+        }
     });
+
+    // Enhanced close-modal logic (add this after existing modal event listeners)
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('[command="close-modal"]')) {
+            const modalId = e.target.closest('button').getAttribute('commandfor');
+            const modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                // Check if in confirmation section (to trigger redirect)
+                const isConfirmation = modalEl.querySelector('#verifyEmailSection-confirmation:not(.hidden)');
+                // Redirect to home (authenticated)
+                window.location.href = '/'; 
+            }
+        }
+    });
+
+    // Go back to Step 1 when "Change" or "Sign in using a different email" is clicked ---
+    modal.querySelectorAll('.change-email').forEach(el => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault();
+            showSection("signin-1");
+        });
+    });
+
+
 }

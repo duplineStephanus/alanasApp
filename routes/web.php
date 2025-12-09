@@ -17,5 +17,5 @@ Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 Route::post('/check-email', [UserController::class, 'checkEmail']);
 Route::post('/signin', [UserController::class, 'signin']);
 Route::post('/register', [UserController::class, 'register']);
-Route::post('/verify-otp', [UserController::class, 'verifyOtp']);
+Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify-otp');
 Route::post('/logout', [UserController::class, 'logout'])->name('logout');

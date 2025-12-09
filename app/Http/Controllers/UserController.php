@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+
 
 class UserController extends Controller
 {
@@ -30,7 +32,7 @@ class UserController extends Controller
 
     public function checkEmail(Request $request)
     {
-        $email = $request->email;
+        $email = strtolower($request->email);
         $exists = User::whereRaw('LOWER(email) = ?', [strtolower($email)])->exists();
 
         return response()->json(['exists' => $exists]);
@@ -77,35 +79,57 @@ class UserController extends Controller
         ]);
 
         // Generate OTP
-        $otp = rand(100000, 999999);
-        cache(["otp_{$request->email}" => $otp], now()->addMinutes(10));
+        $otp = strval(rand(100000, 999999));
+
+        // Store OTP in cache, keyed by email, expiring in 10 minutes
+        Cache::put('otp_' . $request->email, $otp, now()->addMinutes(10));
 
         // TEMPORARY: log OTP to Laravel log for testing
         logger("OTP for {$request->email}: {$otp}");
 
-        // (Optional) send OTP via email
+        // (Future Setup) send OTP via email
         // Mail::raw("Your verification code is: {$otp}", function($msg) use ($request) {
         //     $msg->to($request->email)->subject('Verify your email');
         // });
 
-        return response()->json(['status' => 'otp_sent']);
+        return response()->json(['status' => 'otp_sent', 'message' => 'OTP sent successfully']);
     }
 
     public function verifyOtp(Request $request)
     {
-        $cachedOtp = cache("otp_{$request->email}");
+        $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|string|size:6', // Adjust size based on your OTP format
+        ]);
 
-        if ($cachedOtp && $cachedOtp == $request->code) {
-            $user = User::where('email', $request->email)->first();
-            if ($user) {
-                $user->email_verified_at = now();
-                $user->save();
-                cache()->forget("otp_{$request->email}");
-                return response()->json(['verified' => true]);
-            }
+        $email = strtolower($request->email);
+        $code = $request->code;
+
+        // Retrieve stored OTP (example using Cache; replace with your storage method, e.g., session('otp_' . $email))
+        $storedOtp = (string) Cache::get('otp_' . $email);
+
+        if (!$storedOtp || $storedOtp !== $code) {
+            return response()->json(['verified' => false, 'message' => 'Invalid OTP']);
         }
 
-        return response()->json(['verified' => false]);
+        // Clear the OTP after successful use
+        Cache::forget('otp_' . $email);
+
+        // Retrieve the user (assuming created during /register and marked as unverified)
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['verified' => false, 'message' => 'User not found']);
+        }
+
+        // Mark user as email-verified if you have a 'email_verified_at' column
+        $user->email_verified_at = now();
+        $user->save();
+
+        // Auto-login the user
+        Auth::login($user);
+
+        return response()->json(['verified' => true, 'message' => 'Account verified and logged in successfully']);
     }
 
     public function logout(Request $request)
