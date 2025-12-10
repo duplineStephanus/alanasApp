@@ -3,6 +3,7 @@ import axios from "axios";
 export function signIn() {
 
     const modal = document.getElementById("signinModal");
+    const closeButtons = document.querySelectorAll('[command="close-modal"]');
 
     function showSection(id) {
         // Hide all sections
@@ -35,14 +36,6 @@ export function signIn() {
         modal.querySelectorAll(".text-red-500").forEach(el => el.classList.add("hidden"));
         // Optionally, reset error text content if you change it dynamically
         modal.querySelectorAll(".text-red-500").forEach(el => el.textContent = "");
-    }
-
-    // Prevent clicks within the form from propagating to backdrop
-    const form = document.getElementById("registerForm");
-    if (form) {
-        form.addEventListener('click', (e) => {
-            e.stopPropagation(); // Halts event bubbling to parent elements
-        });
     }
 
     // Clear errors when modal is opened
@@ -220,19 +213,21 @@ export function signIn() {
         }
     });
 
-    // Enhanced close-modal logic (add this after existing modal event listeners)
-    document.addEventListener('click', (e) => {
-        if (e.target.matches('[command="close-modal"]')) {
-            const modalId = e.target.closest('button').getAttribute('commandfor');
+    // Close modal only when X button is clicked
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const modalId = btn.getAttribute('commandfor');
             const modalEl = document.getElementById(modalId);
+
             if (modalEl) {
-                // Check if in confirmation section (to trigger redirect)
-                const isConfirmation = modalEl.querySelector('#verifyEmailSection-confirmation:not(.hidden)');
-                // Redirect to home (authenticated)
-                window.location.href = '/'; 
+                modalEl.classList.add('hidden');
             }
-        }
+        });
     });
+
 
     // Go back to Step 1 when "Change" or "Sign in using a different email" is clicked ---
     modal.querySelectorAll('.change-email').forEach(el => {

@@ -1,7 +1,8 @@
 <!-- Modal backdrop -->
-    <div id="signinModal" class="fixed inset-0 flex items-center justify-center bg-black/50 overflow-y-auto font-display z-50 hidden">
+    <div id="signinModal" 
+    class="fixed inset-0 flex items-center justify-center bg-black/50 overflow-y-auto font-display z-50 hidden pointer-events-none">
         <!-- Modal content -->
-        <form id="registerForm" class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+        <form id="registerForm" class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 pointer-events-auto">
                 @csrf
                 <!-- Sign in : enter email and continue-->
                 <div id="signin-1" class="hidden">
