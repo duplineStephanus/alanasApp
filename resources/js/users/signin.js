@@ -184,8 +184,31 @@ export function signIn() {
                 alert("Unexpected response");
 
         } catch (err) {
+            if (err.response && err.response.status === 422) {
+                const errors = err.response.data.errors;
+
+                if (errors.name) {
+                    nameError.textContent = errors.name[0];
+                    nameError.classList.remove("hidden");
+                }
+
+                if (errors.email) {
+                    emailError.textContent = errors.email[0];
+                    emailError.classList.remove("hidden");
+                }
+
+                if (errors.password) {
+                    passwordError.textContent = errors.password[0];
+                    passwordError.classList.remove("hidden");
+                }
+
+                return; // stop further execution
+            }
+
             console.error(err);
+            alert('Something went wrong. Please try again.');
         }
+
     });
 
     // Step 5: Verify OTP

@@ -44,6 +44,7 @@
         <div class="group relative flex gap-x-6 rounded-lg p-2 hover:bg-white/5">
           <div>
             <button
+                type="button"
                 class="logout-btn width-full text-left text-white font-semibold">
                   Logout
                 <span class="absolute inset-0"></span>

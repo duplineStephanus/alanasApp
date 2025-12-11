@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
-    public function home () {
 
+    public function home () {
          //if user/guest show all products using index function 
          $products = Product::with('variants')->get();
 
@@ -33,9 +33,15 @@ class UserController extends Controller
     public function checkEmail(Request $request)
     {
         $email = strtolower($request->email);
-        $exists = User::whereRaw('LOWER(email) = ?', [strtolower($email)])->exists();
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        if ($user) {
+            return response()->json([
+                'exists' => true,
+                'is_verified' => $user->email_verified_at !== null,
+            ]);
+        }
+        return response()->json(['exists' => false]);
 
-        return response()->json(['exists' => $exists]);
     }
 
     public function signin (Request $request)
@@ -64,8 +70,17 @@ class UserController extends Controller
         $request->validate([
             'email' => 'required|email|unique:users,email',
             'name' => 'required|string|max:255',
-            'password' => 'required|confirmed|min:6'
+            'password' => [
+                'required',
+                'confirmed',
+                'min:8',
+                'regex:/[a-z]/',    // at least one lowercase
+                'regex:/[A-Z]/',    // at least one uppercase
+                'regex:/[0-9]/',    // at least one number
+                'regex:/[@$!%*?&]/' // at least one special character
+            ],
         ]);
+
 
         //normalize email
         $email = strtolower($request->email);

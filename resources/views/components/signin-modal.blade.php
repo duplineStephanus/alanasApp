@@ -106,7 +106,7 @@
                         </div> 
 
                         <div class="flex items-center space-x-5 mx-5 mb-4">
-                            <p>jane.doe@gmail.com</p>
+                            <p id="registerSection-email">jane.doe@gmail.com</p>
                             <button type="button" class="change-email text-blue-500 text-sm">Change</button>
                         </div>
 
