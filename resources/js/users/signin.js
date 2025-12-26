@@ -4,6 +4,7 @@ export function signIn() {
 
     const modal = document.getElementById("signinModal");
     const closeButtons = document.querySelectorAll('[command="close-modal"]');
+    const otpEmail = document.getElementById("verify-email").textContent = email;
 
     function showSection(id) {
         // Hide all sections
@@ -104,8 +105,27 @@ export function signIn() {
 
         try {
             const res = await axios.post("/signin", { email, password });
+            
             if (res.data.success) location.reload();
             else { errorEl.textContent = "Invalid credentials"; errorEl.classList.remove("hidden"); }
+
+            /*
+            if (res.data.success) {
+                if (res.data.otp_verified){
+                    location.reload();
+                } else {
+                    //send user to verify otp
+                    //otpEmail.textContent = email;
+                    showSection("verifyEmailSection-otp");
+                    }   
+            } else {
+                //back end will determine if the error message should be "You have maxed out on your attempt, please come back in 24 hours." or "Invalid credentials."
+                errorEl.textContent = res.data.message;
+                errorEl.classList.remove("hidden");
+            }
+            */
+
+
         } catch (err) {
             errorEl.textContent = "Something went wrong"; errorEl.classList.remove("hidden");
         }
@@ -179,6 +199,7 @@ export function signIn() {
             });
 
             if (res.data.status === "otp_sent")
+                //otpEmail.textContent = email;
                 showSection("verifyEmailSection-otp");
             else 
                 alert("Unexpected response");
