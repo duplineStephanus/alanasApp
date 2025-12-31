@@ -4,6 +4,7 @@ use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
+use GuzzleHttp\Middleware;
 
 Route::get('/', [UserController::class, 'home']);
 
@@ -23,3 +24,5 @@ Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify-o
 
 //SIGN IN ROUTES 
 Route::post('/logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');
+//or change middle ware later to valid email only 
+Route::post('/resend-otp', [UserController::class, 'resendOtp'])->name('resend-otp');

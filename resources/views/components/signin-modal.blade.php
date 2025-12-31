@@ -21,7 +21,7 @@
                 <div class="mb-4">
                     <label for="signin-email" class="block text-sm font-medium text-tamanuleaf">Email</label>
                     <input type="email" id="signin-email" name="email" placeholder="Enter your email" required>
-                    <p id="signin-emailError" class="text-red-500 text-sm mt-1 hidden">Valid email is required.</p>
+                    <p id="signin-emailError" class="error-message text-red-500 text-sm mt-1 hidden">Valid email is required.</p>
                 </div>
 
                 <button type="button" id="signin-step1-continue-btn" class="btn-primary">Continue</button>
@@ -76,7 +76,7 @@
                         <a href="#" class="text-xs text-blue-500 hover:underline">Forgot password?</a>
                     </div>
                     <input type="password" id="signin-password" name="password" placeholder="Enter your password" required class="w-full border border-gray-300 rounded px-3 py-2 mt-1"/>
-                    <p id="signin-passwordError" class="text-red-500 text-sm mt-1 hidden">Invalid password.</p>
+                    <p id="signin-passwordError" class="error-message text-red-500 text-sm mt-1 hidden">Invalid password.</p>
                 </div>
 
                 <button type="button" id="signin-step2-signin-btn" class="btn-primary">Sign In</button>
@@ -148,25 +148,25 @@
                 <div class="mb-4">
                     <label for="create-email" class="block text-sm font-medium text-tamanuleaf">Email</label>
                     <input type="email" id="create-email" name="email" placeholder="Enter your email" required value="jane.doe@gmail.com">
-                    <p id="create-emailError" class="text-red-500 text-sm mt-1 hidden">Valid email is required.</p>
+                    <p id="create-emailError" class="error-message text-red-500 text-sm mt-1 hidden">Valid email is required.</p>
                 </div>
 
                 <div class="mb-4">
                     <label for="create-name" class="block text-sm font-medium text-tamanuleaf">Name</label>
                     <input type="text" id="create-name" name="name" placeholder="Enter your name" required>
-                    <p id="create-nameError" class="text-red-500 text-sm mt-1 hidden">Valid name is required.</p>
+                    <p id="create-nameError" class="error-message text-red-500 text-sm mt-1 hidden">Valid name is required.</p>
                 </div>
 
                 <div class="mb-4">
                     <label for="create-password" class="block text-sm font-medium text-tamanuleaf">Password </label>
                     <input type="password" id="create-password" name="password" placeholder="Enter your password" required>
-                    <p id="create-passwordError" class="text-red-500 text-sm mt-1 hidden">Valid password is required.</p>
+                    <p id="create-passwordError" class="error-message text-red-500 text-sm mt-1 hidden">Valid password is required.</p>
                 </div>
 
                 <div class="mb-4">
                     <label for="create-password_confirmation" class="block text-sm font-medium text-tamanuleaf">Confirm Password </label>
                     <input type="password" id="create-password_confirmation" name="password_confirmation" placeholder="Re-enter your password" required>
-                    <p id="create-passwordConfirmedError" class="text-red-500 text-sm mt-1 hidden">Valid password confirmation is required.</p>
+                    <p id="create-passwordConfirmedError" class="error-message text-red-500 text-sm mt-1 hidden">Valid password confirmation is required.</p>
                 </div>
 
                 <button type="button" id="create-account-btn" class="btn-primary">Continue</button>
@@ -210,9 +210,15 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="code" class="block text-sm font-medium text-tamanuleaf">Enter security code</label>
+                    <div class="flex justify-between items-center">
+                        <label for="code" class="block text-sm font-medium text-tamanuleaf">Enter security code</label>
+                        <button type="button" id="resend-otp-btn" class="text-blue-500 mt-2">
+                         Resend Code
+                        </button>
+                        <p id="resendOtpMessage" class="text-green-500 text-sm mt-1 hidden"></p>
+                    </div>
                     <input type="text" id="code" name="code" placeholder="Enter your code" required>
-                    <p id="codeError" class="text-red-500 text-sm mt-1 hidden">
+                    <p id="codeError" class="error-message text-red-500 text-sm mt-1 hidden">
                         Invalid security code 
                         <span>
                             Re-send code

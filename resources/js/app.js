@@ -15,7 +15,6 @@ if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 }
 
-
 import { addToCart } from './cart/add-to-cart';
 
 document.addEventListener('DOMContentLoaded', function (){

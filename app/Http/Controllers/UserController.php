@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class UserController extends Controller
 {
 
-    protected function ResetAttempts(string $type): void
+    protected function ResetAttempts(string $type, int $userId): void
     {
         // 1. Determine which table to use
         switch ($type) {
@@ -33,7 +33,7 @@ class UserController extends Controller
                 throw new BadRequestHttpException('Invalid attempt type.');
         }
 
-        $userId = auth()->id();
+        $userId = $userId;
 
         // 2. Reset attempts if record exists
         DB::table($table)
@@ -45,7 +45,7 @@ class UserController extends Controller
             ]);
     }
 
-    protected function RecordFailedAttempt(string $type): void
+    protected function RecordFailedAttempt(string $type, int $userId): void
     {
         // 1. Determine which table to use
         switch ($type) {
@@ -62,7 +62,7 @@ class UserController extends Controller
                 throw new BadRequestHttpException('Invalid attempt type.');
         }
 
-        $userId = auth()->id();
+        $userId = $userId;
 
         // 2. Ensure a record exists (create if missing)
         $attempt = DB::table($table)
@@ -92,7 +92,7 @@ class UserController extends Controller
     }
 
 
-    protected function AttemptsMaxed(string $type): bool
+    protected function AttemptsMaxed(string $type, int $userId): bool
     {
         // 1. Determine model, limits, and lockout window
         switch ($type) {
@@ -113,7 +113,7 @@ class UserController extends Controller
                 throw new BadRequestHttpException('Invalid attempt type.');
         }
 
-        $userId = auth()->id();
+        $userId = $userId;
 
         // 2. Fetch attempt record
         $attempt = DB::table($table)
@@ -178,28 +178,58 @@ class UserController extends Controller
 
     }
 
-    public function signin (Request $request)
+    public function signin(Request $request)
     {
+        $email = strtolower($request->email);
+        $password = $request->password;
 
-        $credentials = [
-            'email' => strtolower($request->email),
-            'password' => $request->password
-        ];
-        //change to check if otp_verified && Auth::attempt($credentials) then log user in
-        if (Auth::attempt($credentials)) {
-            return response()->json(['success' => true]);
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Invalid credentials'
+            ]);
         }
 
-        // run AttemptsMaxed method
+        $userId = $user->id; // for attempt tracking
 
-        //if AttemptsMaxed returns true
-        //return response()->json(['success' => false, 'message' => 'Attempts maxed']);
-        
-        //else return response()->json(['success' => false, 'message' => 'Invalid credentials']);
+        // 1. Check password attempts lockout
+        if ($this->AttemptsMaxed('password', $userId)) {
+            return response()->json([
+                'status' => 'locked',
+                'retry_after' => 24
+            ]);
+        }
 
-        //return response()->json(['success' => false, ']);
-        return response()->json(['success' => false]);
+        // 2. Verify password
+        if (!Hash::check($password, $user->password)) {
+            $this->RecordFailedAttempt('password', $userId);
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Invalid credentials'
+            ]);
+        }
+
+        // 3. Password correct → reset attempts
+        $this->ResetAttempts('password', $userId);
+
+        // 4. Check OTP verification
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'status' => 'otp_required'
+            ]);
+        }
+
+        // 5. Fully authenticated → now login
+        Auth::login($user);
+
+        return response()->json([
+            'status' => 'success'
+        ]);
     }
+
+
 
     public function register(Request $request)
     {
@@ -253,39 +283,72 @@ class UserController extends Controller
 
     public function verifyOtp(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'code' => 'required|string|size:6', // Adjust size based on your OTP format
-        ]);
-
         $email = strtolower($request->email);
         $code = $request->code;
 
-        // Retrieve stored OTP (example using Cache; replace with your storage method, e.g., session('otp_' . $email))
-        $storedOtp = (string) Cache::get('otp_' . $email);
-
-        if (!$storedOtp || $storedOtp !== $code) {
-            return response()->json(['verified' => false, 'message' => 'Invalid OTP']);
-        }
-
-        // Clear the OTP after successful use
-        Cache::forget('otp_' . $email);
-
-        // Retrieve the user (assuming created during /register and marked as unverified)
         $user = User::where('email', $email)->first();
+        
+        $userId = $user->id; // for attempt tracking
 
         if (!$user) {
-            return response()->json(['verified' => false, 'message' => 'User not found']);
+            return response()->json([
+                'status' => 'invalid'
+            ]);
         }
 
-        // Mark user as email-verified if you have a 'email_verified_at' column
+        Auth::login($user);
+
+        if ($this->AttemptsMaxed('otp', $userId)) {
+            Auth::logout();
+
+            return response()->json([
+                'status' => 'locked',
+                'retry_after' => 1
+            ]);
+        }
+
+        $storedOtp = Cache::get('otp_' . $email);
+
+        if (!$storedOtp || $storedOtp !== $code) {
+            $this->RecordFailedAttempt('otp', $userId);
+            Auth::logout();
+
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Invalid OTP. Please try again.'
+            ]);
+        }
+
+        // OTP correct
+        Cache::forget('otp_' . $email);
+        $this->ResetAttempts('otp', $userId);
+
         $user->email_verified_at = now();
         $user->save();
 
-        // Auto-login the user
-        Auth::login($user);
+        return response()->json([
+            'status' => 'verified'
+        ]);
+    }
 
-        return response()->json(['verified' => true, 'message' => 'Account verified and logged in successfully']);
+    public function resendOtp(Request $request)
+    {
+        $email = strtolower($request->email);
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['status' => 'invalid']);
+        }
+
+        // Generate a new OTP
+        $otp = strval(rand(100000, 999999));
+        Cache::put('otp_' . $email, $otp, now()->addMinutes(10));
+
+        // Optional: log OTP for testing
+        logger("Resent OTP for {$email}: {$otp}");
+
+        // (Future: send OTP via email)
+        return response()->json(['status' => 'otp_resent', 'message' => 'OTP sent successfully']);
     }
 
     public function logout(Request $request)
