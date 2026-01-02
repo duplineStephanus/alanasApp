@@ -26,3 +26,5 @@ Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify-o
 Route::post('/logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');
 //or change middle ware later to valid email only 
 Route::post('/resend-otp', [UserController::class, 'resendOtp'])->name('resend-otp');
+
+Route::post('/prepare-otp', [UserController::class, 'prepareOtpForEmail'])->name('prepare-otp');

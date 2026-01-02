@@ -43,6 +43,11 @@ export function signIn() {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
     }
 
+    function isValidName(name) {
+        return typeof name === 'string' && name.length >= 4 && name.length <= 225;
+    }
+
+
     function clearErrors() {
         modal.querySelectorAll(".text-red-500").forEach(el => {
             el.classList.add("hidden");
@@ -59,6 +64,21 @@ export function signIn() {
             input.value = '';
         });
     }
+
+    async function prepareOtp(email) {
+        try {
+            const res = await axios.post("/prepare-otp", { email });
+
+            const messageEl = document.getElementById("otpMessageText");
+            if (messageEl && res.data.message) {
+                messageEl.textContent = res.data.message;
+                messageEl.classList.remove("hidden");
+            }
+        } catch (err) {
+            console.error("Failed to prepare OTP", err);
+        }
+    }
+
     //FUNCTIONS ENDS HERE
 
 
@@ -88,6 +108,7 @@ export function signIn() {
 
         if (!email || !isValidEmail(email)) {
             errorEl.textContent = "Please enter a valid email.";
+            console.log("JS isValidEmail() failed.");
             errorEl.classList.remove("hidden");
             return;
         }
@@ -103,7 +124,15 @@ export function signIn() {
             }
         } catch (err) {
             console.error(err);
-            errorEl.textContent = "Something went wrong.";
+
+            //If validation error from Laravel (422)
+            if (err.response?.status === 422 && err.response.data?.error) {
+                errorEl.textContent = err.response.data.error;
+                console.log("Laravel EMAIL ERROR 422");
+            } else (
+                errorEl.textContent = "Something went wrong."
+            )
+
             errorEl.classList.remove("hidden");
         }
     });
@@ -132,6 +161,7 @@ export function signIn() {
                     break;
                 case "otp_required":
                     document.getElementById("verify-email").textContent = email;
+                    await prepareOtp(email);
                     showSection("verifyEmailSection-otp");
                     break;
                 case "locked":
@@ -169,15 +199,15 @@ export function signIn() {
 
         // Name validation
         const nameError = document.getElementById("create-nameError");
-        if (!name) { nameError.textContent = "Name is required"; nameError.classList.remove("hidden"); hasError = true; } else nameError.classList.add("hidden");
+        if (!name) { nameError.textContent = "Name is required"; nameError.classList.remove("hidden"); hasError = true; } else if (!isValidName(name)) { nameError.textContent = "Name must be between 4 and 225 chars."; nameError.classList.remove("hidden"); hasError = true; } else nameError.classList.add("hidden");
 
         // Email validation
         const emailError = document.getElementById("create-emailError");
-        if (!isValidEmail(email)) { emailError.textContent = "Please enter a valid email"; emailError.classList.remove("hidden"); hasError = true; } else emailError.classList.add("hidden");
+        if(!email){emailError.textContent = "Email is required"; emailError.classList.remove("hidden"); hasError = true; } else if (!isValidEmail(email)) { emailError.textContent = "Please enter a valid email"; emailError.classList.remove("hidden"); hasError = true; } else emailError.classList.add("hidden");
 
         // Password validation
         const passwordError = document.getElementById("create-passwordError");
-        if (!isValidPassword(password)) { passwordError.textContent = "Password must be at least 8 chars with uppercase, lowercase, number, and special char"; passwordError.classList.remove("hidden"); hasError = true; } else passwordError.classList.add("hidden");
+        if (!isValidPassword(password)) { passwordError.textContent = "Password must be at least 8 chars and no longer than 25 chars with 1 uppercase, 1 lowercase, 1 number, and 1 special char."; passwordError.classList.remove("hidden"); hasError = true; } else passwordError.classList.add("hidden");
 
         // Confirm password
         const confirmError = document.getElementById("create-passwordConfirmedError");
@@ -189,6 +219,7 @@ export function signIn() {
             const res = await axios.post("/register", { name, email, password, password_confirmation: confirm });
             if (res.data.status === "otp_sent") {
                 document.getElementById("verify-email").textContent = email;
+                await prepareOtp(email);
                 showSection("verifyEmailSection-otp");
             }
         } catch (err) {
@@ -200,8 +231,8 @@ export function signIn() {
                 console.error("DATA:", err.response.data);
             }
 
-            alert("Something went wrong. Please try again.");
-                }
+            console.log("Something went wrong. Please try again.");
+        }
     });
 
     // Step 5: Verify OTP
@@ -219,7 +250,7 @@ export function signIn() {
                 case "verified":
                     clearPasswordInputs();
                     location.reload();
-                    break;
+                    return; // no need to show "success" message
                 case "locked":
                     errorEl.textContent = `Too many attempts. Try again in ${retry_after} hours.`;
                     errorEl.classList.remove("hidden");
@@ -230,6 +261,9 @@ export function signIn() {
                     break;
             }
         } catch (err) {
+            // If navigation already started, ignore
+            if (document.visibilityState === "hidden") return;
+
             console.error(err);
             errorEl.textContent = "Something went wrong. Please try again.";
             console.log(email);

@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Validator;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 
@@ -167,16 +168,40 @@ class UserController extends Controller
     public function checkEmail(Request $request)
     {
         $email = strtolower($request->email);
+
+        // Step 1: Validate email format only (RFC + DNS)
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email:rfc,dns',
+        ]);
+
+        if ($validator->fails()) {
+            // Invalid email format: stop here, no DB check
+            return response()->json([
+                'exists' => false,
+                'error' => 'Please enter a valid email.',
+            ], 422);
+        }
+
+        // Step 2: Check if email exists in DB
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
         if ($user) {
             return response()->json([
                 'exists' => true,
                 'is_verified' => $user->email_verified_at !== null,
             ]);
         }
-        return response()->json(['exists' => false]);
 
+        return response()->json([
+            'exists' => false,
+        ]);
     }
+
+
+
+
+
+
 
     public function signin(Request $request)
     {
@@ -240,12 +265,18 @@ class UserController extends Controller
         ]);
 
         $request->validate([
-            'email' => 'required|email|unique:users,email',
-            'name' => 'required|string|max:255',
+            'email' => 'required|email:rfc,dns|unique:users,email',
+            'name' => [
+                'required',
+                'string',
+                'max:225',
+                'min:4'
+            ],
             'password' => [
                 'required',
                 'confirmed',
                 'min:8',
+                'max:25',
                 'regex:/[a-z]/',    // at least one lowercase
                 'regex:/[A-Z]/',    // at least one uppercase
                 'regex:/[0-9]/',    // at least one number
@@ -281,20 +312,45 @@ class UserController extends Controller
         return response()->json(['status' => 'otp_sent', 'message' => 'OTP sent successfully']);
     }
 
+   public function prepareOtpForEmail(Request $request)
+   {
+        $email = strtolower($request->email);
+
+        $storedOtp = Cache::get('otp_' . $email);
+
+        if (!$storedOtp) {
+            $newOtp = strval(rand(100000, 999999));
+            Cache::put('otp_' . $email, $newOtp, now()->addMinutes(10));
+
+            logger("New OTP for {$email}: {$newOtp}");
+
+            return response()->json([
+                'status' => 'otp_ready',
+                'message' => 'Your previous One Time Password expired. A new one has been sent to your email, '
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'otp_ready',
+            'message' => 'To verify your email address we have sent a One Time Password to your email, '
+        ]);
+    }
+
+
     public function verifyOtp(Request $request)
     {
         $email = strtolower($request->email);
         $code = $request->code;
 
         $user = User::where('email', $email)->first();
-        
-        $userId = $user->id; // for attempt tracking
 
         if (!$user) {
             return response()->json([
                 'status' => 'invalid'
             ]);
         }
+
+        $userId = $user->id;
 
         Auth::login($user);
 
@@ -309,7 +365,8 @@ class UserController extends Controller
 
         $storedOtp = Cache::get('otp_' . $email);
 
-        if (!$storedOtp || $storedOtp !== $code) {
+        //If OTP does not match
+        if ($storedOtp !== $code) {
             $this->RecordFailedAttempt('otp', $userId);
             Auth::logout();
 

@@ -204,9 +204,14 @@
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-5 mx-5 mb-4">
-                    <p>To verify your email address we've sent a One Time Password (OTP) to jane. <span id="verify-email">jane.doe@gmail.com</span> </p>
-                    <a href="" class="text-blue-500">Change</a>
+                <div class="flex items-end space-x-5 mx-5 mb-4">
+                    <p>
+                        <span id="otpMessageText">
+                            To verify your email address we've sent a One Time Password (OTP) to
+                        </span> 
+                        <span id="verify-email"></span> 
+                        <button type="button" class="change-email text-blue-500">Change</button> 
+                    </p>
                 </div>
 
                 <div class="mb-4">
