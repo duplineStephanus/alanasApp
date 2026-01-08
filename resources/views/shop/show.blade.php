@@ -53,7 +53,7 @@
                     @csrf
                     <input type="hidden" id="product_id" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" id="variant_id" name="variant_id" value="{{ $product->variants->first()->id }}">
-                    <button type="submit" class="w-full bg-coastalfern text-white py-3 rounded-md font-semibold">Add to Cart</button>
+                    <button type="submit" class="add-to-cart w-full bg-coastalfern text-white py-3 rounded-md font-semibold">Add to Cart</button>
                 </form>
                 
                 <!-- Benefits -->

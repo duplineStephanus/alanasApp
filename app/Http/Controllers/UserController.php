@@ -197,12 +197,6 @@ class UserController extends Controller
         ]);
     }
 
-
-
-
-
-
-
     public function signin(Request $request)
     {
         $email = strtolower($request->email);
@@ -253,8 +247,6 @@ class UserController extends Controller
             'status' => 'success'
         ]);
     }
-
-
 
     public function register(Request $request)
     {
