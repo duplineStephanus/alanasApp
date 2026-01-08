@@ -5,36 +5,59 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\AddToCartRequest;
+use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
-    public function index(){
-
+    public function index()
+    {
         // Guest user
         if (!Auth::check()) {
-            $cartItems = session()->get('cart', []);
+            $cart = Cart::where('session_id', session()->getId())
+                ->with('items.product')
+                ->first();
+
+            $cartItems = [];
+
+            if ($cart) {
+                $cartItems = $cart->items->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->product->name,
+                        'price' => $item->product->price,
+                        'quantity' => $item->quantity,
+                        'size' => $item->size,
+                        'variant' => $item->variant,
+                        'image' => $item->product->image_path,
+                    ];
+                })->toArray();
+            }
+
             return view('cart.index', compact('cartItems'));
         }
 
         // Logged-in user
-        $cartItems = Cart::where('user_id', Auth::id())
-            ->with('product')
-            ->get()
-            ->map(function ($cart) {
+        $cart = Cart::where('user_id', Auth::id())
+            ->with('items.product')
+            ->first();
+
+        $cartItems = [];
+
+        if ($cart) {
+            $cartItems = $cart->items->map(function ($item) {
                 return [
-                    'id' => $cart->id,
-                    'name' => $cart->product->name,
-                    'price' => $cart->product->price,
-                    'quantity' => $cart->quantity,
-                    'size' => $cart->size,
-                    'variant' => $cart->variant,
-                    'image' => $cart->product->image_path,
+                    'id' => $item->id,
+                    'name' => $item->product->name,
+                    'price' => $item->product->price,
+                    'quantity' => $item->quantity,
+                    'size' => $item->size,
+                    'variant' => $item->variant,
+                    'image' => $item->product->image_path,
                 ];
-            })
-            ->toArray();
+            })->toArray();
+        }
 
         return view('cart.index', compact('cartItems'));
-
     }
 
     public function add(AddToCartRequest $request)
@@ -75,29 +98,19 @@ class CartController extends Controller
 
     public function count()
     {
-        // Get session ID for guest user
-        $sessionId = session()->getId();
-
-        // Optional: log session ID for testing
-        logger("Session ID: {$sessionId}");
-
-        // Find cart for current user/session
-        $cart = Cart::where('session_id', $sessionId)
-            ->orWhere('user_id', auth()->id())
-            ->first();
-
-        // Optional: log cart for testing
-        logger("Cart: " . json_encode($cart));
-
         $count = 0;
-        
+
+        if(auth()->check()){
+            $cart = Cart::where('user_id', auth()->id())->first();
+        }else{
+            $cart = Cart::where('session_id', session()->getId())->first();
+        }
         if ($cart) {
             $count = $cart->items()->sum('quantity');
         }
 
-        return response()->json([
-            'count' => $count
-        ]);
+        return response()->json(['count' => $count]);
+
     }
     
 }

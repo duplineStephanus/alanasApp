@@ -9,6 +9,12 @@ export function addToCart () {
 
         if (!btn) return;
 
+        btn.classList.add('clicked');
+
+        setTimeout(() => {
+            btn.classList.remove('clicked');
+        }, 200);
+
         const productCard = btn.closest('.product-card');
         const productId = btn.dataset.productId;
         const variantId = productCard.querySelector('select[name="size"]').value;

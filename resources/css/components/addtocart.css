@@ -1,0 +1,12 @@
+@layer components {
+    .add-to-cart svg path {
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .add-to-cart.clicked svg path {
+        fill: #1F3A25; 
+        transform: scale(0.9);
+    }
+    .add-to-cart.clicked svg text {
+        fill: #1F3A25; 
+    }
+}

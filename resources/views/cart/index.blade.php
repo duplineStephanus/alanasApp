@@ -47,7 +47,8 @@
                         </td>
 
                         <td class="py-4 text-center">
-                            <form action="{{ route('cart.update', $item['id']) }}" method="POST">
+                            <form>
+                            {{-- <form action="{{ route('cart.update', $item['id']) }}" method="POST"> --}}
                                 @csrf
                                 @method('PATCH')
 
@@ -66,7 +67,8 @@
                         </td>
 
                         <td class="py-4 text-center">
-                            <form action="{{ route('cart.remove', $item['id']) }}" method="POST">
+                            <form>
+                            {{-- <form action="{{ route('cart.remove', $item['id']) }}" method="POST"> --}}
                                 @csrf
                                 @method('DELETE')
 
@@ -102,7 +104,8 @@
             </div>
 
             <a
-                href="{{ route('checkout.index') }}"
+                href="#"
+                {{-- href="{{ route('checkout.index') }}" --}}
                 class="block text-center mt-4 bg-black text-white py-2 rounded"
             >
                 Proceed to Checkout
