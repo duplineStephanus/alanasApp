@@ -1,1 +1,0 @@
-// Optional: remove item from cart

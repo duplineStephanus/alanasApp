@@ -17,13 +17,18 @@
                 <div class="space-y-6 border-t border-gray-200 px-4 py-6 font-body">
                     <div class="flow-root">
                         @auth
-                            <x-user-menu id="mobile-user-menu" variant="mobile"></x-user-menu>
+                            <x-user.user-menu id="mobile-user-menu" variant="mobile"></x-user.user-menu>
                         @endauth
                     </div>
                     <div class="flow-root">
                     <a href="/" 
                     class="-m-2 block p-2 font-medium text-gray-900">Shop</a>
                     </div>
+                    @auth
+                    <div class="flow-root">
+                    <a href="#" class="-m-2 block p-2 font-medium text-gray-900">Your Orders</a>
+                    </div>  
+                    @endauth
                     <div class="flow-root">
                     <a href="#" class="-m-2 block p-2 font-medium text-gray-900">About Us</a>
                     </div>

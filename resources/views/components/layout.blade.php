@@ -8,10 +8,10 @@
     <title>Alana's App</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-white text-coconuthusk">
+<body class="bg-white text-coconuthusk font-body">
     <div >
         <x-mobile-menu/>
-        <x-signin-modal/>
+        <x-user.signin-modal/>
         <!-- Header -->
         <header class="relative">
             <nav aria-label="Top" class="mx-auto max-w-full px-4 sm:px-6 lg:px-8 my-1 py-1 mt-2">
@@ -47,7 +47,7 @@
 
                     <div class="ml-auto flex items-center">
                         <div class="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                            <x-user-btn/> <!-- Greet user / show sign in button -->
+                            <x-user.user-btn/> <!-- Greet user / show sign in button -->
                         </div>
 
                         <!-- Log Out Form -->
@@ -64,34 +64,7 @@
                         </div>
 
                         <!-- Cart -->
-                        <div id="cart" class="ml-4 flow-root lg:ml-6 relative mr-3">
-                            <a href="/cart" class="group -m-2 flex items-center p-2 relative">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="38" height="43" class="h-6 w-6 text-gray-400 hover:text-tamanuleaf" viewBox="0 0 38 43"><path id="Subtraction_2" data-name="Subtraction 2" d="M35.487,43H2.513A2.372,2.372,0,0,1,0,40.807L3.768,16.678a2.373,2.373,0,0,1,2.513-2.194H9.735v-4.9a9.579,9.579,0,1,1,19.157,0v4.9h2.826a2.372,2.372,0,0,1,2.513,2.194L38,40.807A2.372,2.372,0,0,1,35.487,43ZM19.314,2.575A6.131,6.131,0,0,0,13.19,8.7v5.785H25.438V8.7A6.131,6.131,0,0,0,19.314,2.575Z" fill="currentColor"/></svg>
-
-                                
-                                
-                                <!-- Badge -->
-                                <span class="cart-counter absolute -top-1 -right-1 bg-red-400 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                @php
-                                    $cartCount = 0;
-
-                                    if (auth()->check()) {
-                                        $cart = \App\Models\Cart::where('user_id', auth()->id())->first();
-                                    } else {
-                                        $cart = \App\Models\Cart::where('session_id', session()->getId())->first();
-                                    }
-
-                                    if ($cart) {
-                                        $cartCount = $cart->items()->sum('quantity');
-                                    }
-                                @endphp
-                                {{$cartCount}}
-                                </span>
-                                <span class="sr-only">items in cart, view bag</span>
-                            </a>
-                        </div>
-
-
+                        <x-cart.cart-btn/>
                     </div>
                 </div> 
             </nav>

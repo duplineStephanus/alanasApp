@@ -18,13 +18,17 @@ Route::post('/register', [UserController::class, 'register']);
 
 Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify-otp');
 
-
-
-
 //CART ROUTES 
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::get('checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+Route::delete('/cart/items/{item}', [CartController::class, 'remove'])->name('cart.items.remove');
+Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity']);
+Route::post('/cart/sync', [CartController::class, 'sync']);
+
+
+
 
 //SIGN IN ROUTES 
 Route::post('/logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');

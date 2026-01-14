@@ -3,37 +3,35 @@
 namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\AddToCartRequest;
 use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
-    public function index()
-    {
+    protected function getCart () {
+        $cartItems = [];
+
         // Guest user
         if (!Auth::check()) {
             $cart = Cart::where('session_id', session()->getId())
-                ->with('items.product')
+                ->with('items.product', 'items.variant')
                 ->first();
-
-            $cartItems = [];
 
             if ($cart) {
                 $cartItems = $cart->items->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'name' => $item->product->name,
-                        'price' => $item->product->price,
+                        'price' => $item->price,
                         'quantity' => $item->quantity,
-                        'size' => $item->size,
-                        'variant' => $item->variant,
-                        'image' => $item->product->image_path,
+                        'size' => $item->variant->size,
+                        'image' => $item->variant->image_url,
+                        'stock_quantity' => $item->variant->stock_quantity,
                     ];
                 })->toArray();
             }
-
-            return view('cart.index', compact('cartItems'));
         }
 
         // Logged-in user
@@ -41,35 +39,50 @@ class CartController extends Controller
             ->with('items.product')
             ->first();
 
-        $cartItems = [];
+            logger('cart id: ' . $cart->id);
 
         if ($cart) {
             $cartItems = $cart->items->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'name' => $item->product->name,
-                    'price' => $item->product->price,
+                    'price' => $item->price,
                     'quantity' => $item->quantity,
-                    'size' => $item->size,
-                    'variant' => $item->variant,
-                    'image' => $item->product->image_path,
+                    'size' => $item->variant->size,
+                    'image' => $item->variant->image_url,
+                    'stock_quantity' => $item->variant->stock_quantity,
                 ];
             })->toArray();
         }
 
-        return view('cart.index', compact('cartItems'));
+        return $cartItems;
+    }
+    public function index()
+    {
+        $cartItems = $this->getCart();
+
+       //change to simply return response()->json cartItems 
+        return response()->json([
+            'items' => $cartItems
+        ]);
     }
 
     public function add(AddToCartRequest $request)
     {
-        // Get session ID for guest user
-        $sessionId = session()->getId();
+        $user= auth()->user();
 
-        // Find or create cart
-        $cart = Cart::firstOrCreate(
-            ['session_id' => $sessionId],
-            ['user_id' => auth()->id()]
-        );
+        if ($user) {
+            // Logged-in: use user_id
+            $cart = Cart::firstOrCreate(
+                ['user_id' => $user->id],
+                ['session_id' => session()->getId()]
+            );
+        } else {
+            // Guest: use session_id
+            $cart = Cart::firstOrCreate(
+                ['session_id' => session()->getId()]
+            );
+        }
 
         // Find existing item in cart
         $item = CartItem::where('cart_id', $cart->id)
@@ -112,5 +125,66 @@ class CartController extends Controller
         return response()->json(['count' => $count]);
 
     }
-    
+
+    // CartController.php
+    public function checkout()
+    {
+        $items = $this->getCart();
+
+        // Calculate subtotal, shipping, tax, total
+        $subtotal = collect($items)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $shipping = 10.00; // fixed
+        $tax = $subtotal * 0.06; // e.g., 6% tax
+        $total = $subtotal + $shipping + $tax;
+
+        return view('cart.checkout', compact('items', 'subtotal', 'shipping', 'tax', 'total'));
+    }
+
+    public function remove(CartItem $item)
+    {
+        // Ensure item belongs to the current cart
+        if (auth()->check()) {
+            $cart = Cart::where('user_id', auth()->id())->first();
+        } else {
+            $cart = Cart::where('session_id', session()->getId())->first();
+        }
+
+        if (! $cart || $item->cart_id !== $cart->id) {
+            abort(403);
+        }
+
+        $item->delete();
+
+        return response()->json([
+            'success' => true
+        ]);
+    }
+
+    public function updateQuantity(Request $request, CartItem $item)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        $item->update([
+            'quantity' => $request->quantity
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function sync(Request $request)
+    {
+
+        logger('syncing cart');
+        
+        foreach ($request->items as $item) {
+            CartItem::where('id', $item['id'])
+                ->update([
+                    'quantity' => $item['quantity']
+                ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

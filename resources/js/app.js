@@ -5,6 +5,7 @@ import './products/product-variant';
 import './users/toggle-signin-modal';
 import './products/product-detail';
 import './users/logout';
+import './cart/view-cart';
 
 import axios from 'axios';
 
