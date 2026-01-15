@@ -13,7 +13,7 @@
         <x-mobile-menu/>
         <x-user.signin-modal/>
         <!-- Header -->
-        <header class="relative">
+        <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
             <nav aria-label="Top" class="mx-auto max-w-full px-4 sm:px-6 lg:px-8 my-1 py-1 mt-2">
                 <div class="flex h-16 items-center">
                     <div class="flex space-x-3">
@@ -82,7 +82,7 @@
             </div>
         </header>
     </div>
-    <main>
+    <main class="pt-[120px]">
         {{$slot}}
     </main>
 

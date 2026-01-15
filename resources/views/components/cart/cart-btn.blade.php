@@ -13,9 +13,9 @@
             if (auth()->check()) {
                 $cart = \App\Models\Cart::where('user_id', auth()->id())->first();
             } else {
-                $cart = \App\Models\Cart::where('session_id', session()->getId())->first();
+                $guestToken = request()->cookie('cart_token');
+                $cart = \App\Models\Cart::where('guest_token', $guestToken)->first();
             }
-
             if ($cart) {
                 $cartCount = $cart->items()->sum('quantity');
             }

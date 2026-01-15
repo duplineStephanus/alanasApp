@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="container mx-auto px-4 py-8 text-coconuthusk">
+    <div class="single-product-container mx-auto px-4 py-8 text-coconuthusk">
         <div class="grid md:grid-cols-2 gap-8">
             <!-- Image -->
             <div id="product-image">
@@ -49,12 +49,13 @@
                 
                 
                 <!-- Add to Cart -->
-                <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST" class="mt-4">
+                <div id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST" class="mt-4">
                     @csrf
                     <input type="hidden" id="product_id" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" id="variant_id" name="variant_id" value="{{ $product->variants->first()->id }}">
-                    <button type="submit" class="add-to-cart w-full bg-coastalfern text-white py-3 rounded-md font-semibold">Add to Cart</button>
-                </form>
+                    <button type="button" class="add-to-cart w-full bg-coastalfern text-white py-3 rounded-md font-semibold">Add to Cart</button>
+                    
+                </div>
                 
                 <!-- Benefits -->
                 <div class="mt-6">

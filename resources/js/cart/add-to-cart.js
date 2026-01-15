@@ -1,10 +1,18 @@
 import { postData } from '../utils/api';
 import { updateCartCounter } from './cart-counter';
 
-export function addToCart() {
-    document.addEventListener('click', function (e) {
+document.addEventListener('click', function (e) {
+        //Test 1 
+        console.log('addToCart function initialized');
+        //Test 2
+        document.addEventListener('click', function (e){
+            console.log('document clicked on', e.target);
+        });
+
+        
         const btn = e.target.closest('.add-to-cart');
         if (!btn) return;
+
 
         e.preventDefault(); // REQUIRED for show.blade.php
 
@@ -15,30 +23,35 @@ export function addToCart() {
         let variantId;
         let quantity = 1;
 
-        // ============================
-        // CASE 1: index.blade.php
-        // ============================
+        
         const productCard = btn.closest('.product-card');
 
         if (productCard) {
+            // ============================
+            // CASE 1: index.blade.php
+            // ============================
+            console.log('case 1');
             productId = btn.dataset.productId;
 
             const variantSelect = productCard.querySelector('select[name="size"]');
             if (!variantSelect) return;
 
             variantId = variantSelect.value;
-        }
-
-        // ============================
-        // CASE 2: show.blade.php
-        // ============================
-        else {
+        } else {
+            // ============================
+            // CASE 2: show.blade.php
+            // ============================
+            console.log('case 2');
             const form = btn.closest('form');
             if (!form) return;
 
             productId = form.querySelector('#product_id')?.value;
             variantId = form.querySelector('#variant_id')?.value;
-            quantity = form.querySelector('#quantity')?.value ?? 1;
+            variantQuantity = form.querySelector('#quantity')?.value;
+
+            console.log('product id: ', productId);
+            console.log('variant id: ', variantId);
+            console.log('quantity: ', quantity);    
         }
 
         // Safety check
@@ -58,5 +71,4 @@ export function addToCart() {
             }
         })
         .catch(err => console.error(err));
-    });
-}
+});

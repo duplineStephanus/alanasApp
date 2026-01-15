@@ -10,7 +10,6 @@ export async function updateCartCounter() {
         const count = response.data.count;
 
         cartCounter.textContent = count;
-        console.log("Cart count updated to:", count);// For testing
 
     } catch (error) {
         console.error("Error fetching cart count:", error);

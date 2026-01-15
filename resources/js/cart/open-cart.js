@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         Your cart is empty.
                     </li>
                 `;
+                updateSubtotal(0);
                 return;
             }
             console.log(items);//Test 

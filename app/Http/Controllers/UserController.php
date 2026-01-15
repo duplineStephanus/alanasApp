@@ -149,6 +149,7 @@ class UserController extends Controller
 
 
     public function home () {
+        
          //if user/guest show all products using index function 
          $products = Product::with('variants')->get();
 

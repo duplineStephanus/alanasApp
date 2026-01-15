@@ -5,7 +5,8 @@ import './products/product-variant';
 import './users/toggle-signin-modal';
 import './products/product-detail';
 import './users/logout';
-import './cart/view-cart';
+import './cart/open-cart';
+import './cart/add-to-cart';
 
 import axios from 'axios';
 
@@ -15,19 +16,3 @@ const token = document.querySelector('meta[name="csrf-token"]');
 if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 }
-
-import { addToCart } from './cart/add-to-cart';
-
-document.addEventListener('DOMContentLoaded', function (){
-
-    const productContainer = this.getElementById('products-container');
-
-    if(productContainer){
-        addToCart(); 
-
-    }
-});
-
-
-
-

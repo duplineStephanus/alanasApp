@@ -10,52 +10,38 @@ use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
-    protected function getCart () {
-        $cartItems = [];
+    protected function getCart()
+    {
+        $cart = null;
 
-        // Guest user
-        if (!Auth::check()) {
-            $cart = Cart::where('session_id', session()->getId())
-                ->with('items.product', 'items.variant')
+        if (Auth::check()) {
+            $cart = Cart::with(['items.product', 'items.variant'])
+                ->where('user_id', Auth::id())
                 ->first();
-
-            if ($cart) {
-                $cartItems = $cart->items->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->product->name,
-                        'price' => $item->price,
-                        'quantity' => $item->quantity,
-                        'size' => $item->variant->size,
-                        'image' => $item->variant->image_url,
-                        'stock_quantity' => $item->variant->stock_quantity,
-                    ];
-                })->toArray();
+        } else {
+            $guestToken = request()->cookie('cart_token');
+            if ($guestToken) {
+                $cart = Cart::with(['items.product', 'items.variant'])
+                    ->where('guest_token', $guestToken)
+                    ->first();
             }
         }
 
-        // Logged-in user
-        $cart = Cart::where('user_id', Auth::id())
-            ->with('items.product')
-            ->first();
-
-            logger('cart id: ' . $cart->id);
-
-        if ($cart) {
-            $cartItems = $cart->items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->product->name,
-                    'price' => $item->price,
-                    'quantity' => $item->quantity,
-                    'size' => $item->variant->size,
-                    'image' => $item->variant->image_url,
-                    'stock_quantity' => $item->variant->stock_quantity,
-                ];
-            })->toArray();
+        if (!$cart) {
+            return [];
         }
 
-        return $cartItems;
+        return $cart->items->map(function ($item) {
+            return [
+                'id'             => $item->id,
+                'name'           => $item->product->name,
+                'price'          => $item->price,
+                'quantity'       => $item->quantity,
+                'size'           => $item->variant?->size,
+                'image'          => $item->variant?->image_url,
+                'stock_quantity' => $item->variant?->stock_quantity,
+            ];
+        })->toArray();
     }
     public function index()
     {
@@ -65,25 +51,23 @@ class CartController extends Controller
         return response()->json([
             'items' => $cartItems
         ]);
+
     }
 
     public function add(AddToCartRequest $request)
     {
-        $user= auth()->user();
-
-        if ($user) {
-            // Logged-in: use user_id
+        if (auth()->check()) {
             $cart = Cart::firstOrCreate(
-                ['user_id' => $user->id],
-                ['session_id' => session()->getId()]
+                ['user_id' => auth()->id()]
             );
         } else {
-            // Guest: use session_id
+            $guestToken = request()->cookie('cart_token');
             $cart = Cart::firstOrCreate(
-                ['session_id' => session()->getId()]
+                ['guest_token' => $guestToken]
             );
-        }
 
+          
+        }
         // Find existing item in cart
         $item = CartItem::where('cart_id', $cart->id)
             ->where('variant_id', $request->variant_id)
@@ -116,7 +100,8 @@ class CartController extends Controller
         if(auth()->check()){
             $cart = Cart::where('user_id', auth()->id())->first();
         }else{
-            $cart = Cart::where('session_id', session()->getId())->first();
+            $guestToken = request()->cookie('cart_token');
+            $cart = Cart::where('guest_token', $guestToken)->first();
         }
         if ($cart) {
             $count = $cart->items()->sum('quantity');
@@ -146,7 +131,8 @@ class CartController extends Controller
         if (auth()->check()) {
             $cart = Cart::where('user_id', auth()->id())->first();
         } else {
-            $cart = Cart::where('session_id', session()->getId())->first();
+            $guestToken = request()->cookie('cart_token');
+            $cart = Cart::where('guest_token', $guestToken)->first();
         }
 
         if (! $cart || $item->cart_id !== $cart->id) {
@@ -154,6 +140,11 @@ class CartController extends Controller
         }
 
         $item->delete();
+
+        //see if cart is empty, if so delete it
+        if ($cart->items()->count() === 0) {
+            $cart->delete();
+        }
 
         return response()->json([
             'success' => true
@@ -176,7 +167,6 @@ class CartController extends Controller
     public function sync(Request $request)
     {
 
-        logger('syncing cart');
         
         foreach ($request->items as $item) {
             CartItem::where('id', $item['id'])

@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->index();
-            $table->string('session_id')->nullable()->index();
+            $table->uuid('guest_token')->nullable()->unique()->index();
             $table->timestamps();
-            $table->unique(['user_id', 'session_id']);
+            $table->unique(['user_id', 'guest_token']);
         });
-
     }
 
     /**

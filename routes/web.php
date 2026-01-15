@@ -27,9 +27,6 @@ Route::delete('/cart/items/{item}', [CartController::class, 'remove'])->name('ca
 Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity']);
 Route::post('/cart/sync', [CartController::class, 'sync']);
 
-
-
-
 //SIGN IN ROUTES 
 Route::post('/logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');
 //or change middle ware later to valid email only 
