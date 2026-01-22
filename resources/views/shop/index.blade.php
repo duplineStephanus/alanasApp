@@ -31,18 +31,26 @@
                         <a href="{{ route('products.show', $product) }}" class="text-coastalfern hover:underline font-body">View Details</a>
 
                         <!-- Variant Selector -->
-                        <div class="mt-3">
+                        <div class="flex items-center align-middle gap-6 mt-3"> 
                             <select name="size" 
                                     class="variant-select bg-coastalfern/35 rounded-md p-1 font-body font-light text-sm"
                                     data-product-id="{{ $product->id }}">
                                 @foreach($product->variants as $variant)
-                                    <option value="{{ $variant->id }}"
+                                    @if ($variant->stock_quantity > 0)
+                                        <option value="{{ $variant->id }}"
                                             data-price="{{ $variant->price }}"
-                                            data-image="{{ $variant->image_url }}">
-                                        {{ $variant->size }}
-                                    </option>
+                                            data-image="{{ $variant->image_url }}"
+                                            data-stock="{{ $variant->stock_quantity }}"
+                                            >
+                                            {{ $variant->size }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
+                            <!-- Stock display next to select -->
+                            <p class="text-sm mt-1 stock-display text-black-400" id="stock-{{ $product->id }}">
+                                {{ $product->variants->first()->stock_quantity }} in stock
+                            </p>
                         </div>
 
                         <!-- Price + Cart -->

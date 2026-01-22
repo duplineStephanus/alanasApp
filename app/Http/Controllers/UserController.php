@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Validator;
 use Carbon\Carbon;
+use App\Models\Cart;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -147,6 +149,48 @@ class UserController extends Controller
         return true;
     }
 
+    protected function mergeGuestCartToUser()
+    {
+        if (!request()->hasCookie('cart_token')) {
+            return;
+        }
+
+        $guestToken = request()->cookie('cart_token');
+        $guestCart = Cart::where('guest_token', $guestToken)->first();
+
+        if (!$guestCart) {
+            return;
+        }
+
+        $user = auth()->user();
+        $userCart = Cart::firstOrCreate(['user_id' => $user->id]);
+
+        foreach ($guestCart->items as $guestItem) {
+            $existing = CartItem::where('cart_id', $userCart->id)
+                ->where('variant_id', $guestItem->variant_id)
+                ->first();
+
+            if ($existing) {
+                $existing->quantity += $guestItem->quantity;
+                $existing->save();
+            } else {
+                CartItem::create([
+                    'cart_id'    => $userCart->id,
+                    'product_id' => $guestItem->product_id,
+                    'variant_id' => $guestItem->variant_id,
+                    'quantity'   => $guestItem->quantity,
+                    'price'      => $guestItem->price,
+                ]);
+            }
+        }
+
+        // Optional: clean up guest cart
+        $guestCart->items()->delete();
+        $guestCart->delete();
+
+        // Optional: clear cookie
+        // return response()->json([...])->withCookie(cookie()->forget('cart_token'));
+    }
 
     public function home () {
         
@@ -243,6 +287,7 @@ class UserController extends Controller
 
         // 5. Fully authenticated → now login
         Auth::login($user);
+        $this->mergeGuestCartToUser();
 
         return response()->json([
             'status' => 'success'
@@ -375,6 +420,7 @@ class UserController extends Controller
 
         $user->email_verified_at = now();
         $user->save();
+        $this->mergeGuestCartToUser();
 
         return response()->json([
             'status' => 'verified'

@@ -17,14 +17,17 @@
                         <label class="block font-semibold">Select Size</label>
                         <select id="variant-select" class="h-10 w-full bg-coastalfern/35 rounded-md p-2 font-body font-light text-sm mt-1">
                             @foreach($product->variants as $variant)
-                            <option value="{{ $variant->id }}"
+                            @if($variant->stock_quantity > 0)
+                                <option value="{{ $variant->id }}"
+                                    data-product-id = "{{ $variant->product_id }}"
                                     data-price="{{ $variant->price }}"
                                     data-image="{{ $variant->image_url }}"
                                     data-stock="{{ $variant->stock_quantity }}"
                                     data-size="{{ $variant->size }}"
                                     data-type="{{ $variant->type }}">
-                                <p>{{ $variant->size }}</p>
-                            </option>
+                                    <p>{{ $variant->size }}</p>
+                                </option>
+                            @endif
                             @endforeach
                         </select>
                         <p id="stock-info" class="text-sm text-gray-500 mt-1"></p>
@@ -32,29 +35,35 @@
 
                     <!-- Quantity -->
                     <div class="mt-4">
-                        <label class="block font-semibold">Quantity</label>
+                        <label 
+                            class="block font-semibold">
+                            Quantity
+                        </label>
                         <div class="flex items-center">
-                            <input type="number" id="quantity" value="1" min="1" class=" h-10 w-20 bg-coastalfern/35 rounded-md p-2 font-body font-light">
-                            <span id="stock-note" class="ml-2 text-sm text-gray-500"></span>
+                            <input 
+                                type="number" 
+                                id="quantity" 
+                                value="1" 
+                                min="1" 
+                                max="{{ $product->variants->first()->stock_quantity }}"
+                                class=" h-10 w-20 bg-coastalfern/35 rounded-md p-2 font-body font-light"
+                            >
+                            <span 
+                                id="stock-note" 
+                                class="ml-2 text-sm">
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Total Price -->
                 <div class="mt-2">
-
                     <p id="price-display" class="text-2xl font-semibold">${{ number_format($product->variants->first()->price, 2) }}</p>
                 </div>
                 
-                
-                
                 <!-- Add to Cart -->
-                <div id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST" class="mt-4">
-                    @csrf
-                    <input type="hidden" id="product_id" name="product_id" value="{{ $product->id }}">
-                    <input type="hidden" id="variant_id" name="variant_id" value="{{ $product->variants->first()->id }}">
-                    <button type="button" class="add-to-cart w-full bg-coastalfern text-white py-3 rounded-md font-semibold">Add to Cart</button>
-                    
+                <div class="mt-4">
+                    <button id="product-details-add-to-cart" type="button" class="add-to-cart mt-4 w-full bg-coastalfern text-white py-3 rounded-md font-semibold">Add to Cart</button>
                 </div>
                 
                 <!-- Benefits -->

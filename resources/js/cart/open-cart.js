@@ -180,7 +180,8 @@ function renderCartItem(item) {
                                 +
                             </button>
                         </div>
-                        <p class="text-red-400 italic">${item.stock} left in stock.</p>
+                        
+                        <p class="text-${item.stock <= 11 ? 'red' : 'black'}-400 italic">${item.stock} left in stock.</p>
                     </div>
                     <button 
                         data-item-id="${item.id}"

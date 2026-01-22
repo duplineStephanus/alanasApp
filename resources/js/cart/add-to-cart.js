@@ -2,18 +2,12 @@ import { postData } from '../utils/api';
 import { updateCartCounter } from './cart-counter';
 
 document.addEventListener('click', function (e) {
-        //Test 1 
-        console.log('addToCart function initialized');
-        //Test 2
-        document.addEventListener('click', function (e){
-            console.log('document clicked on', e.target);
-        });
-
-        
+      
         const btn = e.target.closest('.add-to-cart');
         if (!btn) return;
 
-
+        //test 2 
+        console.log('btn found', btn);
         e.preventDefault(); // REQUIRED for show.blade.php
 
         btn.classList.add('clicked');
@@ -41,17 +35,23 @@ document.addEventListener('click', function (e) {
             // ============================
             // CASE 2: show.blade.php
             // ============================
-            console.log('case 2');
-            const form = btn.closest('form');
-            if (!form) return;
+            console.log('case 2: Show Page');
+            
+            const variantSelect = document.getElementById('variant-select');
+            const quantityInput = document.getElementById('quantity');
 
-            productId = form.querySelector('#product_id')?.value;
-            variantId = form.querySelector('#variant_id')?.value;
-            variantQuantity = form.querySelector('#quantity')?.value;
+            if (variantSelect) {
+                // Get the actual option element currently chosen
+                const selectedOption = variantSelect.options[variantSelect.selectedIndex];
 
-            console.log('product id: ', productId);
-            console.log('variant id: ', variantId);
-            console.log('quantity: ', quantity);    
+                variantId = variantSelect.value; 
+                productId = selectedOption.dataset.productId;
+                quantity = quantityInput ? quantityInput.value : 1;
+
+                console.log('product id from data attr: ', productId);
+                console.log('variant id from value: ', variantId);
+                console.log('quantity: ', quantity);
+         }
         }
 
         // Safety check
