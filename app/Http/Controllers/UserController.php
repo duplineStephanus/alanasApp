@@ -2,194 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use Validator;
-use Carbon\Carbon;
-use App\Models\Cart;
 use App\Models\User;
 use App\Models\Product;
-use App\Models\CartItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Services\CartService;
+use App\Services\AuthAttemptService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Illuminate\Support\Facades\Validator;
 
 
 class UserController extends Controller
 {
 
-    protected function ResetAttempts(string $type, int $userId): void
+    protected AuthAttemptService $attempts;
+    protected CartService $cartService;
+  
+
+    public function __construct(
+        AuthAttemptService $attempts,
+        CartService $cartService
+      
+        )
     {
-        // 1. Determine which table to use
-        switch ($type) {
-            case 'password':
-                $table = 'password_attempts';
-                break;
-
-            case 'otp':
-                $table = 'otp_attempts';
-                break;
-
-            default:
-                // Abort immediately if invalid type is provided
-                throw new BadRequestHttpException('Invalid attempt type.');
-        }
-
-        $userId = $userId;
-
-        // 2. Reset attempts if record exists
-        DB::table($table)
-            ->where('user_id', $userId)
-            ->update([
-                'failed_attempts' => 0,
-                'last_failed_at' => null,
-                'updated_at' => now(),
-            ]);
-    }
-
-    protected function RecordFailedAttempt(string $type, int $userId): void
-    {
-        // 1. Determine which table to use
-        switch ($type) {
-            case 'password':
-                $table = 'password_attempts';
-                break;
-
-            case 'otp':
-                $table = 'otp_attempts';
-                break;
-
-            default:
-                // Abort immediately on invalid type
-                throw new BadRequestHttpException('Invalid attempt type.');
-        }
-
-        $userId = $userId;
-
-        // 2. Ensure a record exists (create if missing)
-        $attempt = DB::table($table)
-            ->where('user_id', $userId)
-            ->first();
-
-        if (!$attempt) {
-            DB::table($table)->insert([
-                'user_id' => $userId,
-                'failed_attempts' => 1,
-                'last_failed_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            return;
-        }
-
-        // 3. Increment failed attempts
-        DB::table($table)
-            ->where('user_id', $userId)
-            ->update([
-                'failed_attempts' => $attempt->failed_attempts + 1,
-                'last_failed_at' => now(),
-                'updated_at' => now(),
-            ]);
-    }
-
-
-    protected function AttemptsMaxed(string $type, int $userId): bool
-    {
-        // 1. Determine model, limits, and lockout window
-        switch ($type) {
-            case 'password':
-                $table = 'password_attempts';
-                $maxAttempts = 3;
-                $lockoutWindow = 24; // hours
-                break;
-
-            case 'otp':
-                $table = 'otp_attempts';
-                $maxAttempts = 5;
-                $lockoutWindow = 1; // hours
-                break;
-
-            default:
-                // Abort immediately if invalid type is sent
-                throw new BadRequestHttpException('Invalid attempt type.');
-        }
-
-        $userId = $userId;
-
-        // 2. Fetch attempt record
-        $attempt = DB::table($table)
-            ->where('user_id', $userId)
-            ->first();
-
-        // 3. If no record exists, user is not locked
-        if (!$attempt || $attempt->failed_attempts < $maxAttempts) {
-            return false;
-        }
-
-        // 4. Check if lockout window has expired
-        $lockoutExpiresAt = Carbon::parse($attempt->last_failed_at)
-            ->addHours($lockoutWindow);
-
-        if (now()->greaterThanOrEqualTo($lockoutExpiresAt)) {
-            // Lock expired → reset attempts
-            DB::table($table)
-                ->where('user_id', $userId)
-                ->update([
-                    'failed_attempts' => 0,
-                    'last_failed_at' => null,
-                    'updated_at' => now(),
-                ]);
-
-            return false;
-        }
-
-        // 5. Still locked
-        return true;
-    }
-
-    protected function mergeGuestCartToUser()
-    {
-        if (!request()->hasCookie('cart_token')) {
-            return;
-        }
-
-        $guestToken = request()->cookie('cart_token');
-        $guestCart = Cart::where('guest_token', $guestToken)->first();
-
-        if (!$guestCart) {
-            return;
-        }
-
-        $user = auth()->user();
-        $userCart = Cart::firstOrCreate(['user_id' => $user->id]);
-
-        foreach ($guestCart->items as $guestItem) {
-            $existing = CartItem::where('cart_id', $userCart->id)
-                ->where('variant_id', $guestItem->variant_id)
-                ->first();
-
-            if ($existing) {
-                $existing->quantity += $guestItem->quantity;
-                $existing->save();
-            } else {
-                CartItem::create([
-                    'cart_id'    => $userCart->id,
-                    'product_id' => $guestItem->product_id,
-                    'variant_id' => $guestItem->variant_id,
-                    'quantity'   => $guestItem->quantity,
-                    'price'      => $guestItem->price,
-                ]);
-            }
-        }
-
-        // Optional: clean up guest cart
-        $guestCart->items()->delete();
-        $guestCart->delete();
-
-        // Optional: clear cookie
-        // return response()->json([...])->withCookie(cookie()->forget('cart_token'));
+        $this->attempts = $attempts;
+        $this->cartService = $cartService;
+      
     }
 
     public function home () {
@@ -259,7 +98,7 @@ class UserController extends Controller
         $userId = $user->id; // for attempt tracking
 
         // 1. Check password attempts lockout
-        if ($this->AttemptsMaxed('password', $userId)) {
+        if ($this->attempts->isMaxed('password', $userId)) {
             return response()->json([
                 'status' => 'locked',
                 'retry_after' => 24
@@ -268,7 +107,8 @@ class UserController extends Controller
 
         // 2. Verify password
         if (!Hash::check($password, $user->password)) {
-            $this->RecordFailedAttempt('password', $userId);
+            //record failed attempt
+            $this->attempts->record('password', $userId);
             return response()->json([
                 'status' => 'invalid',
                 'message' => 'Invalid credentials'
@@ -276,7 +116,7 @@ class UserController extends Controller
         }
 
         // 3. Password correct → reset attempts
-        $this->ResetAttempts('password', $userId);
+        $this->attempts->reset('password', $userId);
 
         // 4. Check OTP verification
         if (!$user->email_verified_at) {
@@ -287,7 +127,7 @@ class UserController extends Controller
 
         // 5. Fully authenticated → now login
         Auth::login($user);
-        $this->mergeGuestCartToUser();
+        $this->cartService->migrateCart();
 
         return response()->json([
             'status' => 'success'
@@ -390,10 +230,10 @@ class UserController extends Controller
 
         $userId = $user->id;
 
-        Auth::login($user);
-
-        if ($this->AttemptsMaxed('otp', $userId)) {
-            Auth::logout();
+        //Auth::login($user);
+        //1. if user maxed out on their attempts kick them out 
+        if ($this->attempts->isMaxed('otp', $userId)) {
+            //Auth::logout();
 
             return response()->json([
                 'status' => 'locked',
@@ -403,10 +243,11 @@ class UserController extends Controller
 
         $storedOtp = Cache::get('otp_' . $email);
 
-        //If OTP does not match
+        //2. If OTP does not match kick them out 
         if ($storedOtp !== $code) {
-            $this->RecordFailedAttempt('otp', $userId);
-            Auth::logout();
+            //record failed attempts
+            $this->attempts->record('otp', $userId);
+            //Auth::logout();
 
             return response()->json([
                 'status' => 'invalid',
@@ -414,13 +255,15 @@ class UserController extends Controller
             ]);
         }
 
-        // OTP correct
+        // 3. if OTP correct - login the user
+        Auth::login($user);
         Cache::forget('otp_' . $email);
-        $this->ResetAttempts('otp', $userId);
+        //reset attempts 
+        $this->attempts->reset('otp', $userId);
 
         $user->email_verified_at = now();
         $user->save();
-        $this->mergeGuestCartToUser();
+        $this->cartService->migrateCart();
 
         return response()->json([
             'status' => 'verified'
