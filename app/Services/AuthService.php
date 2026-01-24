@@ -7,23 +7,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use App\Services\CartService;
 use App\Services\AuthAttemptService;
 
 class AuthService
 {
-    protected CartService $cartService;
     protected AuthAttemptService $attempts;
-
+    protected CartService $cartService;
+  
     public function __construct(
-        CartService $cartService, 
-        AuthAttemptService $attempts
+        AuthAttemptService $attempts,
+        CartService $cartService
+      
         )
     {
-        $this->cartService = $cartService;
         $this->attempts = $attempts;
+        $this->cartService = $cartService;
+      
     }
 
     public function signin(Request $request)
@@ -34,139 +34,78 @@ class AuthService
         $user = User::where('email', $email)->first();
 
         if (!$user) {
-            return response()->json(['status' => 'invalid', 'message' => 'Invalid credentials']);
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Invalid credentials'
+            ]);
         }
 
-        $userId = $user->id;
+        $userId = $user->id; // for attempt tracking
 
+        // 1. Check password attempts lockout
         if ($this->attempts->isMaxed('password', $userId)) {
-            return response()->json(['status' => 'locked', 'retry_after' => 24]);
+            return response()->json([
+                'status' => 'locked',
+                'retry_after' => 24
+            ]);
         }
 
+        // 2. Verify password
         if (!Hash::check($password, $user->password)) {
+            //record failed attempt
             $this->attempts->record('password', $userId);
-            return response()->json(['status' => 'invalid', 'message' => 'Invalid credentials']);
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Invalid credentials'
+            ]);
         }
 
+        // 3. Password correct → reset attempts
         $this->attempts->reset('password', $userId);
 
+        // 4. Check OTP verification
         if (!$user->email_verified_at) {
-            return response()->json(['status' => 'otp_required']);
+            return response()->json([
+                'status' => 'otp_required'
+            ]);
         }
 
+        // 5. Fully authenticated → now login
         Auth::login($user);
         $this->cartService->migrateCart();
 
-        return response()->json(['status' => 'success']);
+        return response()->json([
+            'status' => 'success'
+        ]);
     }
 
     public function register(Request $request)
-    {
-        $request->merge(['email' => strtolower($request->email)]);
+    {        
+        //normalize email
+        $email = strtolower($request->email);
 
-        $validator = Validator::make($request->all(), [
-            'email'    => 'required|email:rfc,dns|unique:users,email',
-            'name'     => 'required|string|max:225|min:4',
-            'password' => [
-                'required', 'confirmed', 'min:8', 'max:25',
-                'regex:/[a-z]/', 'regex:/[A-Z]/', 'regex:/[0-9]/', 'regex:/[@$!%*?&]/'
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            throw ValidationException::withMessages($validator->errors()->messages());
-        }
-
+        // Save user temporarily unverified
         $user = User::create([
-            'name'              => $request->name,
-            'email'             => $request->email,
-            'password'          => Hash::make($request->password),
+            'name' => $request->name,
+            'email' => $email,
+            'password' => Hash::make($request->password),
             'email_verified_at' => null,
         ]);
 
+        // Generate OTP
         $otp = strval(rand(100000, 999999));
-        Cache::put('otp_' . $request->email, $otp, now()->addMinutes(10));
 
-        logger("OTP for {$request->email}: {$otp}");
-
-        return response()->json(['status' => 'otp_sent', 'message' => 'OTP sent successfully']);
-    }
-
-    public function prepareOtpForEmail(Request $request)
-    {
-        $email = strtolower($request->email);
-        $storedOtp = Cache::get('otp_' . $email);
-
-        if (!$storedOtp) {
-            $newOtp = strval(rand(100000, 999999));
-            Cache::put('otp_' . $email, $newOtp, now()->addMinutes(10));
-            logger("New OTP for {$email}: {$newOtp}");
-
-            return response()->json([
-                'status'  => 'otp_ready',
-                'message' => 'Your previous One Time Password expired. A new one has been sent.'
-            ]);
-        }
-
-        return response()->json([
-            'status'  => 'otp_ready',
-            'message' => 'A One Time Password has been sent to your email.'
-        ]);
-    }
-
-    public function verifyOtp(Request $request)
-    {
-        $email = strtolower($request->email);
-        $code  = $request->code;
-
-        $user = User::where('email', $email)->first();
-
-        if (!$user) {
-            return response()->json(['status' => 'invalid']);
-        }
-
-        $userId = $user->id;
-
-        if ($this->attempts->isMaxed('otp', $userId)) {
-            return response()->json(['status' => 'locked', 'retry_after' => 1]);
-        }
-
-        $storedOtp = Cache::get('otp_' . $email);
-
-        if ($storedOtp !== $code) {
-            $this->attempts->record('otp', $userId);
-            return response()->json([
-                'status'  => 'invalid',
-                'message' => 'Invalid OTP. Please try again.'
-            ]);
-        }
-
-        Auth::login($user);
-        Cache::forget('otp_' . $email);
-        $this->attempts->reset('otp', $userId);
-
-        $user->email_verified_at = now();
-        $user->save();
-
-        $this->cartService->migrateCart();
-
-        return response()->json(['status' => 'verified']);
-    }
-
-    public function resendOtp(Request $request)
-    {
-        $email = strtolower($request->email);
-        $user  = User::where('email', $email)->first();
-
-        if (!$user) {
-            return response()->json(['status' => 'invalid']);
-        }
-
-        $otp = strval(rand(100000, 999999));
+        // Store OTP in cache, keyed by email, expiring in 10 minutes
         Cache::put('otp_' . $email, $otp, now()->addMinutes(10));
 
-        logger("Resent OTP for {$email}: {$otp}");
+        // TEMPORARY: log OTP to Laravel log for testing
+        logger("OTP for {$email}: {$otp}");
 
-        return response()->json(['status' => 'otp_resent', 'message' => 'OTP sent successfully']);
+        // (Future Setup) send OTP via email
+        // Mail::raw("Your verification code is: {$otp}", function($msg) use ($request) {
+        //     $msg->to($request->email)->subject('Verify your email');
+        // });
+
+        return response()->json(['status' => 'otp_sent', 'message' => 'OTP sent successfully']);
     }
 }
