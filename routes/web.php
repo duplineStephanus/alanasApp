@@ -12,9 +12,9 @@ Route::get('/shop/{product}', [ProductController::class, 'show'])->name('product
 
 Route::post('/check-email', [UserController::class, 'checkEmail']);
 
-Route::post('/signin', [UserController::class, 'signin']);
+Route::post('/signin', [UserController::class, 'signin'])->middleware('guest');
 
-Route::post('/register', [UserController::class, 'register']);
+Route::post('/register', [UserController::class, 'register'])->middleware('guest');
 
 Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify-otp');
 

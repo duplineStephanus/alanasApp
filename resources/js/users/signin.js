@@ -176,7 +176,7 @@ export function signIn() {
         } catch (err) {
             clearPasswordInputs();
             console.error(err);
-            errorEl.textContent = "Something went wrong. Please try again 1.";
+            errorEl.textContent = "Something went wrong. Please try again";
             errorEl.classList.remove("hidden");
         }
     });
@@ -231,7 +231,7 @@ export function signIn() {
                 console.error("DATA:", err.response.data);
             }
 
-            console.log("Something went wrong. Please try again. 2");
+            console.log("Something went wrong. Please try again.");
         }
     });
 
@@ -265,7 +265,7 @@ export function signIn() {
             if (document.visibilityState === "hidden") return;
 
             console.error(err);
-            errorEl.textContent = "Something went wrong. Please try again. 3";
+            errorEl.textContent = "Something went wrong. Please try again.";
             console.log(email);
             errorEl.classList.remove("hidden");
         }

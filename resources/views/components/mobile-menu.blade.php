@@ -50,11 +50,9 @@
                         <div class="flow-root">
                         <button class="signin-btn -m-2 block p-2 font-medium text-gray-900" command="close" commandfor="mobile-menu">Sign in</button>
                         </div>
-
                         <div class="flow-root">
-                            <a href="#" class="-m-2 block p-2 font-medium text-gray-900">Register</a>
+                        <button class="signin-btn -m-2 block p-2 font-medium text-gray-900" command="close" commandfor="mobile-menu">Register</button>
                         </div>
-
                     @endauth
 
                 </div>
