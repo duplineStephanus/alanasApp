@@ -53,4 +53,14 @@ class CartService
         // Optional: clear cookie
         // return response()->json([...])->withCookie(cookie()->forget('cart_token'));
     }
+    public function removeItem(CartItem $item): void
+    {
+        $item->delete();
+
+        $cart = $item->cart;
+
+        if ($cart->items()->count() === 0) {
+            $cart->delete();
+        }
+    }
 }

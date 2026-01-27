@@ -6,11 +6,14 @@ use App\Models\CartItem;
 use App\Policies\CartItemPolicy;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+class AuthServiceProvider extends ServiceProvider
 {
-    
+     protected $policies = [
+        // other policies...
+        CartItem::class => CartItemPolicy::class,
+    ];
     /**
-     * Register any application services.
+     * Register services.
      */
     public function register(): void
     {
@@ -18,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Bootstrap services.
      */
     public function boot(): void
     {

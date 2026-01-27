@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\AddToCartRequest;
-use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
@@ -125,30 +125,13 @@ class CartController extends Controller
         return view('cart.checkout', compact('items', 'subtotal', 'shipping', 'tax', 'total'));
     }
 
-    public function remove(CartItem $item)
+    public function remove(CartItem $item, CartService $cartService)
     {
-        // Ensure item belongs to the current cart
-        if (auth()->check()) {
-            $cart = Cart::where('user_id', auth()->id())->first();
-        } else {
-            $guestToken = request()->cookie('cart_token');
-            $cart = Cart::where('guest_token', $guestToken)->first();
-        }
+        $this->authorize('delete', $item);
 
-        if (! $cart || $item->cart_id !== $cart->id) {
-            abort(403);
-        }
+        $cartService->removeItem($item);
 
-        $item->delete();
-
-        //see if cart is empty, if so delete it
-        if ($cart->items()->count() === 0) {
-            $cart->delete();
-        }
-
-        return response()->json([
-            'success' => true
-        ]);
+        return response()->json(['success' => true]);
     }
 
     public function updateQuantity(Request $request, CartItem $item)
