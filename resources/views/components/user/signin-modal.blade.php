@@ -153,7 +153,7 @@
 
                 <div class="mb-4">
                     <label for="create-name" class="block text-sm font-medium text-tamanuleaf">Name</label>
-                    <input type="text" id="create-name" name="name" placeholder="Enter your name" required>
+                    <input type="text" id="create-name" name="name" placeholder="First and last name" required>
                     <p id="create-nameError" class="error-message text-red-500 text-sm mt-1 hidden">Valid name is required.</p>
                 </div>
 

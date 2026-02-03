@@ -1,4 +1,5 @@
 <x-layout>
+    <!-- SHOP SHOW BLADE -->
     <div class="single-product-container mx-auto px-4 py-8 text-coconuthusk">
         <div class="grid md:grid-cols-2 gap-8">
             <!-- Image -->

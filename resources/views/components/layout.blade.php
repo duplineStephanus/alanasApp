@@ -74,7 +74,7 @@
                         <div class="space-x-2">
                             <i class="fa-solid fa-truck-fast text-sandyshore"></i>
                             <span >
-                                Free shipping on orders over $50.00
+                                Free shipping on orders over $100.00
                             </span>
                         </div>
                     @endfor

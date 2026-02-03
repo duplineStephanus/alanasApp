@@ -16,11 +16,15 @@ class DatabaseSeeder extends Seeder
 
         $this->call(ProductSeeder::class); 
         
-        // User::factory(10)->create();
+        //to create 3 users using the UserFactory (no overinding data) 
+        User::factory(3)->create();
 
+        // to overide specific factory data pass an array  
+        /*
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Jane Doe',
+            'email' => 'Jane.Doe@gmail.com',
         ]);
+        */
     }
 }
