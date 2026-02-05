@@ -6,6 +6,7 @@
 @import './components/user-menu.css';
 @import './components/announcement-bar.css';
 @import './components/addtocart.css';
+@import './components/checkout-fields.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
