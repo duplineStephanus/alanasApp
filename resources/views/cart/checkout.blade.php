@@ -23,10 +23,16 @@
                         @endif
 
                         <!-- Shipping Address -->
-                        <x-cart.shipping-form></x-cart.shipping-form>
-
+                        <x-cart.shipping-address/>
+                     
                         <!-- Billing Address -->
-                        <x-cart.billing-form></x-cart.billing-form>
+                        <x-cart.billing-address/>
+
+                        <!-- Shipping Method -->
+                        <x-cart.shipping-method/>
+
+                        <!-- Payment Information -->
+                        <x-cart.payment-info/>
 
                         <!-- Payment Information -->
                         <div class="mt-10">

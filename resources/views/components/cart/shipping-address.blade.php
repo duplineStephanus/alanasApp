@@ -1,5 +1,5 @@
 <!-- Shipping Address -->
-<div class="shipping-address">
+<div class="shipping-address border-t border-gray-200 pt-6">
     <h2 class="text-2xl font-display font-medium text-gray-900 mb-4">Shipping address</h2>
     <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
         <div>

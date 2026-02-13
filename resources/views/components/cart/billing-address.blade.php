@@ -1,6 +1,6 @@
 <!-- Billing Address Form-->
-<div class="billing mt-6">
-    <div class="flex items-center">
+<div class="billing border-t border-gray-200 pt-6">
+    <div class="flex items-center mb-4">
         <input type="checkbox" name="billing_same_as_shipping" id="same-as-shipping" checked
             class="h-4 w-4 border-gray-300 rounded text-tamanuleaf focus:ring-tamanuleaf">
         <label for="same-as-shipping" class="ml-2 text-sm text-gray-700">

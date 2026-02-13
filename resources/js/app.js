@@ -8,6 +8,7 @@ import './users/logout';
 import './cart/open-cart';
 import './cart/add-to-cart';
 import './cart/toggle-billing-address'; 
+import './cart/cvv-code';
 
 import axios from 'axios';
 
