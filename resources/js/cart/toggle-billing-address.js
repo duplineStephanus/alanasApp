@@ -1,6 +1,6 @@
 // resources/js/cart/toggle-billing-address.js
 
-document.addEventListener('DOMContentLoaded', () => {
+export function toggleBillingAddress() {
     const checkbox = document.getElementById('same-as-shipping');
     const billingSection = document.querySelector('.billing-address');
 
@@ -21,4 +21,4 @@ document.addEventListener('DOMContentLoaded', () => {
             billingSection.classList.remove('hidden');
         }
     });
-});
+}

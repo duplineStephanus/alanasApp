@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+export function openCvvCodeHelper() {
     const helpBtn = document.getElementById('cvv-help-btn');
     if (!helpBtn) return;
 
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.innerHTML = `
         <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 relative overflow-hidden">
             <!-- Close button -->
-            <button type="button" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl leading-none">
+            <button type="button" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-3xl leading-none">
                 &times;
             </button>
 
@@ -73,4 +73,4 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.add('hidden');
         }
     });
-});
+}

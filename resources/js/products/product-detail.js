@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+export function toggleProductDetail() {
     const select = document.getElementById('variant-select');
 
     if (!select) return;
@@ -62,5 +62,4 @@ document.addEventListener('DOMContentLoaded', function() {
     select.addEventListener('change', function() {
         updateProductDisplay(this.options[this.selectedIndex]);
     });
-
-});
+}

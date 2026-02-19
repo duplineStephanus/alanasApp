@@ -116,6 +116,10 @@ class CartController extends Controller
     {
         $items = $this->getCart();
 
+        if(empty($items)){
+            return view('cart.empty');
+        }
+
         // Calculate subtotal, shipping, tax, total
         $subtotal = collect($items)->sum(fn($item) => $item['price'] * $item['quantity']);
         $shipping = 10.00; // fixed

@@ -1,6 +1,6 @@
 import { signIn } from "./signin";
 
-document.addEventListener("DOMContentLoaded", () => {
+export function toggleSigninModal() {
     const signinBtns = document.querySelectorAll(".signin-btn");
     const signinModal = document.getElementById("signinModal");
 
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resetSigninModal();
         }
     });
-});
+}
 
 function resetSigninModal() {
     const modal = document.getElementById("signinModal");

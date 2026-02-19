@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div id="checkout" class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-16">
                 
@@ -24,9 +24,6 @@
 
                         <!-- Shipping Address -->
                         <x-cart.shipping-address/>
-                     
-                        <!-- Billing Address -->
-                        <x-cart.billing-address/>
 
                         <!-- Shipping Method -->
                         <x-cart.shipping-method/>
@@ -34,7 +31,9 @@
                         <!-- Payment Information -->
                         <x-cart.payment-info/>
 
-                        <!-- Payment Information -->
+                       <!-- Billing Address -->
+                        <x-cart.billing-address/>
+                        
                         <div class="mt-10">
                             <button type="submit"
                                     class="w-full bg-tamanuleaf border border-transparent rounded-md py-3 px-8 text-base font-medium text-white hover:bg-coastalfern focus:outline-none focus:ring-2 focus:ring-tamanuleaf focus:ring-offset-2">
@@ -51,7 +50,7 @@
 
                         
 
-                        <ul role="list" class="divide-y divide-gray-200">
+                        <ul id="order-summary-list" role="list" class="divide-y divide-gray-200">
                             @foreach ($items as $item)
                                 <li class="flex py-6">
                                     <div class="flex-shrink-0 w-24 h-24 rounded-md overflow-hidden bg-gray-100">
@@ -60,8 +59,8 @@
                                     <div class="ml-4 flex-1">
                                         <h3 class="text-base font-medium text-gray-900">{{$item['name']}}</h3>
                                         <p class="mt-1 text-sm text-gray-500">{{$item['size']}}</p>
-                                        <p class="mt-1 text-sm text-gray-900">× {{$item['quantity']}}</p>
-                                        <p class="mt-2 text-base font-medium text-gray-900">{{$item['price']}}</p>
+                                        <p class="mt-1 text-sm text-gray-900"> Quantity: {{$item['quantity']}}</p>
+                                        <p class="mt-2 text-base font-medium text-gray-900">$ {{$item['price']}}</p>
                                     </div>
                                 </li>
                             
@@ -69,20 +68,20 @@
                             
                         </ul>
 
-                        <dl class="mt-8 space-y-4 border-t border-gray-200 pt-6">
-                            <div class="flex justify-between text-base text-gray-700">
+                        <dl id="order-summary-totals" class="mt-8 space-y-4 border-t border-gray-200 pt-6">
+                            <div class="cart-subtotal flex justify-between text-base text-gray-700">
                                 <dt>Subtotal</dt>
                                 <dd class="font-medium">$ {{number_format($subtotal, 2)}}</dd>
                             </div>
-                            <div class="flex justify-between text-base text-gray-700">
+                            <div class="shipping-handling-cost flex justify-between text-base text-gray-700">
                                 <dt>Shipping & handling</dt>
                                 <dd class="font-medium">$ {{number_format($shipping, 2)}}</dd>
                             </div>
-                            <div class="flex justify-between text-base text-gray-700">
+                            <div class="estimated-tax flex justify-between text-base text-gray-700">
                                 <dt>Estimated tax</dt>
                                 <dd class="font-medium">$ {{number_format($tax, 2)}}</dd>
                             </div>
-                            <div class="flex justify-between text-lg font-medium text-gray-900 border-t border-gray-200 pt-4">
+                            <div class="order-total flex justify-between text-lg font-medium text-gray-900 border-t border-gray-200 pt-4">
                                 <dt>Total</dt>
                                 <dd>$ {{number_format($total, 2)}}</dd>
                             </div>

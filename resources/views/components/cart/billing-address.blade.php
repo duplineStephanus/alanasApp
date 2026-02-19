@@ -17,17 +17,13 @@
                 <select name="billing[country]" id="country" required
                         class="checkout-fields">
                     <option value="US">United States</option>
-                    <option value="US">FSM</option>
                     <option value="US">Guam</option>
-                    <option value="US">Marshall Islands</option>
                     <option value="US">Palau</option>
-                    <option value="US">Philippines</option>
-                    <option value="US">Saipan</option>
                     <!-- Add more countries as needed -->
                 </select>
             </div>
             <div>
-                <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number <span class="font-light italic">(optional)</span></label>
                 <input type="text" name="billing[phone]" id="phone" required
                     class="checkout-fields">
             </div>

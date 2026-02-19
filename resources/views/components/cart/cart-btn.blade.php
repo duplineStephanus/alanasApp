@@ -50,7 +50,7 @@
                 <div class="mt-8">
                 <div class="flow-root">
                     <ul role="list" class="-my-6 divide-y divide-gray-200">
-                    {{-- cart items dynamically added by cart/view-cart.js --}}
+                    {{-- cart items dynamically added by cart/open-cart.js --}}
                     </ul>
                 </div>
                 </div>
@@ -63,7 +63,13 @@
                 </div>
                 <p class="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
                 <div class="mt-6">
-                <a href="{{route('cart.checkout')}}" class="flex items-center justify-center rounded-md border border-transparent bg-tamanuleaf px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-coastalfern">Checkout</a>
+        
+                <a 
+                id="cart-checkout-link"
+                href="{{ route('cart.checkout') }}" 
+                class="flex items-center justify-center rounded-md border border-transparent bg-tamanuleaf px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-coastalfern">
+                Checkout
+                </a>
                 </div>
                 <div class="mt-6 flex justify-center text-center text-sm text-gray-500">
                 <p>

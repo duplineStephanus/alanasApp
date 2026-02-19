@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { updateCartCounter } from './cart-counter'; 
+import { updateCartCounter } from './cart-counter';   
 let cartState = {};
 
-document.addEventListener('DOMContentLoaded', () => {
+export function updateCart () {
     const cartButton = document.querySelector('.cart-btn');
     const cartList = document.querySelector('[role="list"]');
     let subtotal = 0;
@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateSubtotal(0);
                 return;
             }
-            console.log(items);//Test 
             subtotal = 0;
 
             items.forEach(item => {
@@ -46,8 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 subtotal += item.price * item.quantity;
             });
 
-            console.log(cartState);
-
             updateSubtotal(subtotal);
 
         } catch (error) {
@@ -59,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawer = document.getElementById('drawer');
     drawer.addEventListener('toggle', () => {
         if (!drawer.open) {
-        
             axios.post('/cart/sync', { items: cartState })
             .then(updateCartCounter())
             .catch(err => console.error('Cart sync failed', err));
@@ -113,8 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         //update cart badge 
         updateCartCounter();
     }
-
-});
+}
 
 
 //HELPER FUNCTIONS 
@@ -213,6 +208,7 @@ function recalculateSubtotal() {
     updateSubtotal(subtotal);
 }
 
+export const getCart = () => cartState;
 
 
 
